@@ -1,0 +1,8 @@
+.mt-5 {
+  margin-bottom: 2rem; /* Adds space below the Registered Users section */
+}
+
+/* Or, for more control, target the specific container: */
+.registered-users-list {
+  margin-bottom: 2rem; /* You can adjust to 3rem or 32px if you want more space */
+}

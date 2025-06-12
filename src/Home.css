@@ -1,0 +1,91 @@
+/* Home.css */
+/* Add these class selectors to style elements in Home.js */
+.home-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 12px;
+}
+
+.home-description {
+    font-size: 1.1rem;
+    color: #555;
+    margin-bottom: 24px;
+    text-align: center;
+    max-width: 500px;
+}
+
+.home-button {
+    background: #3b82f6;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 32px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 16px;
+}
+
+.home-button:hover {
+    background: #2563eb;
+}
+.home-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px;
+    min-height: 100vh;
+    background: #f7f7f7;
+}
+
+.map-container {
+  width: 500px;
+  height: 350px;
+  margin: 2rem auto;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+@media (max-width: 400px) {
+    .map-container {
+        width: 100%;
+        height: 180px;
+    }
+}
+
+body, html {
+  overflow-x: hidden;
+}
+
+.jumbotron-image {
+  display: block;
+  width: 100vw;
+  max-width: 100vw;
+  min-width: 100vw;
+  height: 320px;
+  object-fit: cover;
+  margin-left: 0;
+  transform: none;
+  border-radius: 0;
+  opacity: 0.35;
+  position: static;
+  left: unset;
+  right: unset;
+  margin-right: 0;
+  margin-left: 0;
+}
+
+.jumbotron.text-center {
+  position: static;
+  z-index: unset;
+  background: unset;
+}
+
+@media (max-width: 600px) {
+  .jumbotron-image {
+    height: 180px;
+  }
+}
