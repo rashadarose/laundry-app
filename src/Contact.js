@@ -43,6 +43,7 @@ const Contact = () => {
                 For more information, please reach out to our team. We are happy to assist you with any questions or concerns.
             </p>
             {/* Houston Map */}
+            <h2 className="mt-4">Our Location: Houston, TX</h2>
             <div className="map-container" style={{ marginTop: '2rem' }}>
                 <iframe
                     title="Houston Map"

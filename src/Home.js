@@ -1,18 +1,21 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './Home.css';
-import bg1 from './bg1.jpg'; // Import your background image
+import bg1 from './bg1.jpg'; 
+import fngologo1 from './fngologo1.png';
+import frontimg1 from './frontimg1.jpg';
+import fng3 from './fng3.png';
 
 function Home() {
     return (
         <div className="home-root" style={{ position: 'relative', zIndex: 1 }}>
-            {/* Transparent background image */}
+            {/* Background overlay */}
             <div
                 style={{
                     backgroundImage: `url(${bg1})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
-                    opacity: 0.12,
+                    opacity: 0.02,
                     position: 'fixed',
                     top: 0,
                     left: 0,
@@ -22,16 +25,75 @@ function Home() {
                     pointerEvents: 'none',
                 }}
             />
-            <div className="jumbotron text-center" style={{ position: 'relative', zIndex: 1 }}>
-                <h1>Welcome to the Laundry App</h1>
-                <nav>
-                    <ul className="home-nav">
-                        <li><Link to="/services">Services</Link></li>
-                        <li><Link to="/pricing">Pricing</Link></li>
-                        <li><Link to="/contact">Contact</Link></li>
-                    </ul>
-                </nav>
-                <h2 className="mt-4">Our Location: Houston, TX</h2>
+            {/* Large front image with overlayed title */}
+            <div style={{ position: 'relative', width: '100%', marginBottom: 40 }}>
+                <img
+                    src={frontimg1}
+                    alt="Laundry App"
+                    style={{
+                        width: '98vw',
+                        maxWidth: '1800px',
+                        height: '48vw',
+                        maxHeight: '520px',
+                        objectFit: 'cover',
+                        display: 'block',
+                        margin: '0 auto',
+                        opacity: 0.15,
+                    }}
+                />
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: 60,
+                        transform: 'translateY(-50%)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                    }}
+                >
+                    <img
+                        src={fng3}
+                        alt="Fold N Go Logo"
+                        style={{
+                            width: 90,
+                            height: 90,
+                            objectFit: 'contain',
+                            marginBottom: 16,
+                            background: 'rgba(255,255,255,0.85)',
+                            borderRadius: 12,
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.10)'
+                        }}
+                    />
+                    <h1
+                        style={{
+                            color: '#fff',
+                            background: 'rgba(0,0,0,0.85)',
+                            padding: '16px 32px',
+                            borderRadius: 8,
+                            fontSize: '2.8rem',
+                            fontWeight: 700,
+                            letterSpacing: 1,
+                            margin: 0,
+                        }}
+                    >
+                        Fold N Go Laundry Service
+                    </h1>
+                    <h2
+                        style={{
+                            color: '#fff',
+                            background: 'rgba(0,0,0,0.85)',
+                            padding: '10px 28px',
+                            borderRadius: 8,
+                            fontSize: '1.6rem',
+                            fontWeight: 400,
+                            letterSpacing: 0.5,
+                            margin: '16px 0 0 0',
+                        }}
+                    >
+                        Fast Laundry Pick Up and Delivery
+                    </h2>
+                </div>
             </div>
 
             {/* Services Section */}

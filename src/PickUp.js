@@ -10,6 +10,7 @@ function PickUp() {
     loadAmount: 1,
     dropoffTime: '',
   });
+  const [loading, setLoading] = useState(false);
 
   // Generate time options in 30-minute intervals
   const generateTimeOptions = () => {
@@ -45,10 +46,35 @@ function PickUp() {
     setForm({ ...form, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle order submission logic here
-    alert('Order submitted!\n' + JSON.stringify(form, null, 2));
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:3002/api/pickups', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(form)
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        alert(data.message || 'Pickup order created successfully!');
+        setForm({
+          name: '',
+          address: '',
+          pickupDate: '',
+          pickupTime: '',
+          loadAmount: 1,
+          dropoffTime: '',
+        });
+      } else {
+        alert(data.error || 'Failed to create pickup order.');
+      }
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+    setLoading(false);
   };
 
   return (
@@ -192,7 +218,14 @@ function PickUp() {
             </div>
           )}
         </div>
-        <button type="submit" className="btn btn-primary w-100" style={{ position: 'relative', zIndex: 1 }}>Submit Order</button>
+        <button
+          type="submit"
+          className="btn btn-primary w-100"
+          style={{ position: 'relative', zIndex: 1 }}
+          disabled={loading}
+        >
+          {loading ? 'Submitting...' : 'Submit Order'}
+        </button>
       </form>
     </div>
   );
