@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import bg1 from './bg1.jpg'; // Import your background image
+import bg1 from './images/bg1.jpg'; // Import your background image
 
 function SignIn() {
   const [email, setEmail] = useState('');

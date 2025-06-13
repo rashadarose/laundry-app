@@ -1,5 +1,5 @@
 import React from 'react';
-import bg1 from './bg1.jpg'; // Import your background image
+import bg1 from './images/bg1.jpg'; // Import your background image
 
 const HOUSTON_COORDS = {
     lat: 29.7604,

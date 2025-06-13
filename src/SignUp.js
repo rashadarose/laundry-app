@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './SignUp.css';
-import bg1 from './bg1.jpg';
+import bg1 from './images/bg1.jpg';
 
 function SignUp() {
   const [form, setForm] = useState({

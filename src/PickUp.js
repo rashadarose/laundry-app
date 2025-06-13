@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import bg1 from './bg1.jpg'; // Import your background image
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import bg1 from './images/bg1.jpg'; // Import your background image
 
 function PickUp() {
   const [form, setForm] = useState({
@@ -9,8 +10,10 @@ function PickUp() {
     pickupTime: '',
     loadAmount: 1,
     dropoffTime: '',
+    user_id: '', // Add user_id field
   });
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate(); // Initialize navigate
 
   // Generate time options in 30-minute intervals
   const generateTimeOptions = () => {
@@ -50,28 +53,33 @@ function PickUp() {
     e.preventDefault();
     setLoading(true);
     try {
+      const price = form.loadAmount * 20; // Calculate price
       const response = await fetch('http://localhost:3002/api/pickups', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(form)
+        body: JSON.stringify({ ...form, price }) // Include price in the POST body
       });
       const data = await response.json();
       if (response.ok && data.success) {
+       
         alert(data.message || 'Pickup order created successfully!');
-        setForm({
-          name: '',
-          address: '',
-          pickupDate: '',
-          pickupTime: '',
-          loadAmount: 1,
-          dropoffTime: '',
+        // Redirect to payment page with price as state
+        navigate('/payments', {
+          state: {
+            amount: price,
+            pickupInfo: form
+          }
         });
+        // Optionally reset form here if you want
+        // setForm({ ... });
       } else {
+         console.log(form)
         alert(data.error || 'Failed to create pickup order.');
       }
     } catch (err) {
+       console.log(form)
       alert('Error: ' + err.message);
     }
     setLoading(false);
@@ -217,6 +225,38 @@ function PickUp() {
               Earliest drop off: {getMinDropoffTime()}
             </div>
           )}
+        </div>
+        {/* Price element */}
+        <div className="mb-3">
+          <label className="form-label">Estimated Price</label>
+          <input
+            type="text"
+            className="form-control"
+            value={`$${(form.loadAmount * 20).toFixed(2)}`}
+            readOnly
+            style={{
+              background: '#e9ecef',
+              color: '#222',
+              border: '1px solid #86b7fe'
+            }}
+          />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="user_id" className="form-label">User ID</label>
+          <input
+            type="text"
+            className="form-control"
+            id="user_id"
+            name="user_id"
+            value={form.user_id}
+            onChange={handleChange}
+            required
+            style={{
+              background: '#cfe2ff',
+              color: '#222',
+              border: '1px solid #86b7fe'
+            }}
+          />
         </div>
         <button
           type="submit"

@@ -1,16 +1,15 @@
-import logo from './logo.svg';
 import fngologo1 from './fngologo1.png';
-import bg1 from './bg1.jpg';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-// Add this import at the top of your file
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import SignIn from './SignIn';
-import SignUp from './SignUp'; // Import SignUp
-import PickUp from './PickUp'; // Import PickUp
+import SignUp from './SignUp'; 
+import PickUp from './PickUp'; 
 import Home from './Home';
-import Contact from './Contact'; // Already imported
+import Contact from './Contact'; 
+import Payment from './Payment';
+import Confirmation from './Confirmation';  
 import React, { useEffect } from 'react';
 
 function App() {
@@ -73,6 +72,12 @@ function App() {
                     <Link className="nav-link" to="/signup">Sign Up</Link>
                   </li>
                    <li className="nav-item">
+                    <Link className="nav-link" to="/payments">Payments</Link>
+                  </li>
+                   <li className="nav-item">
+                    <Link className="nav-link" to="/confirmation">Confirmation</Link>
+                  </li>
+                   <li className="nav-item">
                     <Link className="nav-link" to="/contact">Contact Us</Link>
                   </li>
                 </ul>
@@ -88,6 +93,8 @@ function App() {
             <Route path="/pickup" element={<PickUp />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/payments" element={<Payment />} />
+            <Route path="/confirmation" element={<Confirmation />} />
             {/* Default route */}
             <Route path="/" element={<div>Welcome to LaundryApp!</div>} />
           </Routes>
