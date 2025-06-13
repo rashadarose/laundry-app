@@ -1,4 +1,6 @@
 import logo from './logo.svg';
+import fngologo1 from './fngologo1.png';
+import bg1 from './bg1.jpg';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 // Add this import at the top of your file
@@ -31,13 +33,22 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <header>
-          <nav className="navbar navbar-expand-lg navbar-light bg-light">
-            <div className="container-fluid">
-              {/* Logo on the left */}
-              <a className="navbar-brand d-flex align-items-center" href="/">
-                <img src={logo} alt="Logo" width="40" height="40" className="d-inline-block align-top me-2" />
-                LaundryApp
+        <header style={{ minHeight: '56px', padding: '0' }}>
+          <nav className="navbar navbar-expand-lg navbar-light bg-light" style={{ minHeight: '56px', padding: '0' }}>
+            <div className="container-fluid" style={{ minHeight: '56px', paddingTop: 0, paddingBottom: 0 }}>
+              <a className="navbar-brand d-flex align-items-center" href="/home" style={{ paddingTop: 0, paddingBottom: 0 }}>
+                <img
+                  src={fngologo1}
+                  alt="Logo"
+                  style={{
+                    height: '90px', // Bigger logo
+                    width: 'auto',
+                    objectFit: 'contain',
+                    marginTop: '-18px', // Pull up to reduce header height
+                    marginBottom: '-18px'
+                  }}
+                  className="d-inline-block align-top me-2"
+                />
               </a>
               {/* Hamburger for mobile */}
               <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -45,15 +56,12 @@ function App() {
                 <span className="navbar-toggler-icon"></span>
               </button>
               {/* Links on the right */}
-
               <div className="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul className="navbar-nav">
                   <li className="nav-item">
                     <Link className="nav-link" to="/home">Home</Link>
                   </li>
-                  <li className="nav-item">
-                    <Link className="nav-link" to="/contact">Contact Us</Link>
-                  </li>
+                 
                   <li className="nav-item">
                     <Link className="nav-link" to="/pickup">Pick Up</Link>
                   </li>
@@ -63,6 +71,9 @@ function App() {
                   {/* TEMP: Sign Up link for testing */}
                   <li className="nav-item">
                     <Link className="nav-link" to="/signup">Sign Up</Link>
+                  </li>
+                   <li className="nav-item">
+                    <Link className="nav-link" to="/contact">Contact Us</Link>
                   </li>
                 </ul>
               </div>
@@ -85,12 +96,22 @@ function App() {
           <div className="container">
             <div className="row text-center text-md-start">
               {/* Logo and About */}
-              <div className="col-md-2 mb-4 mb-md-0">
-                <img src={logo} alt="Logo" width="48" height="48" className="mb-2" />
+              <div className="col-md-2 mb-4 mb-md-0 d-flex flex-column align-items-center align-items-md-start">
+                <img
+                  src={fngologo1}
+                  alt="Logo"
+                  style={{
+                    width: '80px',
+                    height: '80px',
+                    objectFit: 'contain',
+                    marginBottom: '0.5rem'
+                  }}
+                  className="mb-2"
+                />
                 <h5>LaundryApp</h5>
                 <p className="small">Your trusted laundry partner in Houston, TX. Fast, friendly, and always fresh!</p>
               </div>
-              {/* Services */}
+             
               <div className="col-md-2 mb-4 mb-md-0">
                 <h6 className="text-uppercase fw-bold mb-3">Services</h6>
                 <ul className="list-unstyled">

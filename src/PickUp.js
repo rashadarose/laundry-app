@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import bg1 from './bg1.jpg'; // Import your background image
 
 function PickUp() {
   const [form, setForm] = useState({
@@ -51,9 +52,25 @@ function PickUp() {
   };
 
   return (
-    <div className="container mt-5" style={{ maxWidth: '500px' }}>
-      <h2 className="mb-4 text-center">Pick Up Order</h2>
-      <form onSubmit={handleSubmit}>
+    <div className="container mt-5" style={{ maxWidth: '500px', position: 'relative', zIndex: 1 }}>
+      {/* Transparent background image */}
+      <div
+        style={{
+          backgroundImage: `url(${bg1})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          opacity: 0.12,
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 0,
+          pointerEvents: 'none',
+        }}
+      />
+      <h2 className="mb-4 text-center" style={{ position: 'relative', zIndex: 1 }}>Pick Up Order</h2>
+      <form onSubmit={handleSubmit} style={{ position: 'relative', zIndex: 1 }}>
         <div className="mb-3">
           <label htmlFor="name" className="form-label">Name</label>
           <input
@@ -65,6 +82,11 @@ function PickUp() {
             onChange={handleChange}
             required
             autoFocus
+            style={{
+              background: '#cfe2ff',
+              color: '#222',
+              border: '1px solid #86b7fe'
+            }}
           />
         </div>
         <div className="mb-3">
@@ -77,6 +99,11 @@ function PickUp() {
             value={form.address}
             onChange={handleChange}
             required
+            style={{
+              background: '#cfe2ff',
+              color: '#222',
+              border: '1px solid #86b7fe'
+            }}
           />
         </div>
         <div className="mb-3">
@@ -89,6 +116,11 @@ function PickUp() {
             value={form.pickupDate}
             onChange={handleChange}
             required
+            style={{
+              background: '#cfe2ff',
+              color: '#222',
+              border: '1px solid #86b7fe'
+            }}
           />
         </div>
         <div className="mb-3">
@@ -100,6 +132,11 @@ function PickUp() {
             value={form.pickupTime}
             onChange={handleChange}
             required
+            style={{
+              background: '#cfe2ff',
+              color: '#222',
+              border: '1px solid #86b7fe'
+            }}
           >
             <option value="">Select time</option>
             {generateTimeOptions().map(time => (
@@ -119,6 +156,11 @@ function PickUp() {
             value={form.loadAmount}
             onChange={handleChange}
             required
+            style={{
+              background: '#cfe2ff',
+              color: '#222',
+              border: '1px solid #86b7fe'
+            }}
           />
         </div>
         <div className="mb-3">
@@ -131,6 +173,11 @@ function PickUp() {
             onChange={handleChange}
             required
             disabled={!form.pickupTime}
+            style={{
+              background: '#cfe2ff',
+              color: '#222',
+              border: '1px solid #86b7fe'
+            }}
           >
             <option value="">Select time</option>
             {form.pickupTime &&
@@ -145,7 +192,7 @@ function PickUp() {
             </div>
           )}
         </div>
-        <button type="submit" className="btn btn-primary w-100">Submit Order</button>
+        <button type="submit" className="btn btn-primary w-100" style={{ position: 'relative', zIndex: 1 }}>Submit Order</button>
       </form>
     </div>
   );

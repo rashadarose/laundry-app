@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './SignUp.css';
+import bg1 from './bg1.jpg';
 
 function SignUp() {
   const [form, setForm] = useState({
@@ -65,13 +66,14 @@ function SignUp() {
       }}
     >
       {/* Transparent background image */}
+        {/* Import the image at the top of the file */}
+        {/* Place bg1.jpg in src or public folder as appropriate */}
         <div
           style={{
-            backgroundImage:
-          'url(https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80)', // Replace with Houston photo below
+            backgroundImage: `url(${bg1})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            opacity: 0.2,
+            opacity: 0.12, // Less opacity for the background image
             position: 'fixed',
             top: 0,
             left: 0,
@@ -81,60 +83,81 @@ function SignUp() {
             pointerEvents: 'none',
           }}
         />
-        <h2 className="mb-4 text-center">Sign Up</h2>
-        <form onSubmit={handleSubmit}>
+        <h2 className="mb-4 text-center" style={{ position: 'relative', zIndex: 1 }}>Sign Up</h2>
+        <form onSubmit={handleSubmit} style={{ position: 'relative', zIndex: 1 }}>
           <div className="mb-3">
             <label htmlFor="name" className="form-label">Name</label>
             <input
-          type="text"
-          className="form-control"
-          id="name"
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-          required
-          autoFocus
+              type="text"
+              className="form-control"
+              id="name"
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              required
+              autoFocus
+              style={{
+                background: '#cfe2ff', // Lighter version of #86b7fe
+                color: '#222',
+                border: '1px solid #86b7fe'
+              }}
             />
           </div>
           <div className="mb-3">
             <label htmlFor="phone" className="form-label">Phone Number</label>
             <input
-          type="tel"
-          className="form-control"
-          id="phone"
-          name="phone"
-          value={form.phone}
-          onChange={handleChange}
-          required
+              type="tel"
+              className="form-control"
+              id="phone"
+              name="phone"
+              value={form.phone}
+              onChange={handleChange}
+              required
+              style={{
+                background: '#cfe2ff',
+                color: '#222',
+                border: '1px solid #86b7fe'
+              }}
             />
           </div>
           <div className="mb-3">
             <label htmlFor="email" className="form-label">Email Address</label>
             <input
-          type="email"
-          className="form-control"
-          id="email"
-          name="email"
-          value={form.email}
-          onChange={handleChange}
-          required
+              type="email"
+              className="form-control"
+              id="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              required
+              style={{
+                background: '#cfe2ff',
+                color: '#222',
+                border: '1px solid #86b7fe'
+              }}
             />
           </div>
           <div className="mb-3">
             <label htmlFor="password" className="form-label">Password</label>
             <input
-          type="password"
-          className="form-control"
-          id="password"
-          name="password"
-          value={form.password}
-          onChange={handleChange}
-          required
+              type="password"
+              className="form-control"
+              id="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              required
+              style={{
+                background: '#cfe2ff',
+                color: '#222',
+                border: '1px solid #86b7fe'
+              }}
             />
           </div>
           <button
             type="submit"
             className="btn btn-primary w-100"
+            style={{ position: 'relative', zIndex: 1 }}
           >
             Sign Up
           </button>

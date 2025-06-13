@@ -1,22 +1,28 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import './Home.css'; // Assuming you have a CSS file for styling
-
-const HOUSTON_COORDS = {
-    lat: 29.7604,
-    lng: -95.3698,
-};
+import './Home.css';
+import bg1 from './bg1.jpg'; // Import your background image
 
 function Home() {
     return (
-        <div className="home-root">
-            <div className="jumbotron text-center">
-                <img
-                    src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
-                    alt="Laundry"
-                    className="img-fluid mb-4 jumbotron-image"
-                    style={{ maxWidth: '100%', height: 'auto' }}
-                />
+        <div className="home-root" style={{ position: 'relative', zIndex: 1 }}>
+            {/* Transparent background image */}
+            <div
+                style={{
+                    backgroundImage: `url(${bg1})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    opacity: 0.12,
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    zIndex: 0,
+                    pointerEvents: 'none',
+                }}
+            />
+            <div className="jumbotron text-center" style={{ position: 'relative', zIndex: 1 }}>
                 <h1>Welcome to the Laundry App</h1>
                 <nav>
                     <ul className="home-nav">
@@ -26,16 +32,6 @@ function Home() {
                     </ul>
                 </nav>
                 <h2 className="mt-4">Our Location: Houston, TX</h2>
-                <div className="map-container">
-                    <iframe
-                        title="Houston Map"
-                        width="100%"
-                        height="300"
-                        frameBorder="0"
-                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${HOUSTON_COORDS.lng-0.1}%2C${HOUSTON_COORDS.lat-0.1}%2C${HOUSTON_COORDS.lng+0.1}%2C${HOUSTON_COORDS.lat+0.1}&layer=mapnik&marker=${HOUSTON_COORDS.lat}%2C${HOUSTON_COORDS.lng}`}
-                        allowFullScreen
-                    ></iframe>
-                </div>
             </div>
 
             {/* Services Section */}
