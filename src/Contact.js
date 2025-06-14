@@ -1,5 +1,6 @@
 import React from 'react';
 import bg1 from './images/bg1.jpg'; // Import your background image
+import fng4 from './images/fng4.png'; // Import the logo
 
 const HOUSTON_COORDS = {
     lat: 29.7604,
@@ -25,7 +26,25 @@ const Contact = () => {
                     pointerEvents: 'none',
                 }}
             />
-            <h1>Contact Us</h1>
+            {/* Logo above the title */}
+            <div className="text-center" style={{ position: 'relative', zIndex: 1 }}>
+                <img
+                    src={fng4}
+                    alt="Fold N Go Logo"
+                    style={{
+                        width: 100,
+                        height: 100,
+                        objectFit: 'contain',
+                        marginBottom: 12,
+                        background: 'rgba(255,255,255,0.85)',
+                        borderRadius: 12,
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
+                    }}
+                />
+            </div>
+            <h2 className="mb-4 text-center" style={{ position: 'relative', zIndex: 1 }}>
+                Contact Us
+            </h2>
             <h2>Houston Location</h2>
             <p>
                 <strong>Address:</strong> 1234 Main St, Houston, TX 77001
@@ -50,7 +69,7 @@ const Contact = () => {
                     width="100%"
                     height="300"
                     frameBorder="0"
-                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${HOUSTON_COORDS.lng-0.1}%2C${HOUSTON_COORDS.lat-0.1}%2C${HOUSTON_COORDS.lng+0.1}%2C${HOUSTON_COORDS.lat+0.1}&layer=mapnik&marker=${HOUSTON_COORDS.lat}%2C${HOUSTON_COORDS.lng}`}
+                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${HOUSTON_COORDS.lng - 0.1}%2C${HOUSTON_COORDS.lat - 0.1}%2C${HOUSTON_COORDS.lng + 0.1}%2C${HOUSTON_COORDS.lat + 0.1}&layer=mapnik&marker=${HOUSTON_COORDS.lat}%2C${HOUSTON_COORDS.lng}`}
                     allowFullScreen
                 ></iframe>
             </div>

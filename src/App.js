@@ -29,6 +29,14 @@ function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  function closeNavbar() {
+    const navbarToggler = document.querySelector('.navbar-toggler');
+    const navbarCollapse = document.getElementById('navbarNav');
+    if (navbarToggler && navbarCollapse && navbarCollapse.classList.contains('show')) {
+      navbarToggler.click();
+    }
+  }
+
   return (
     <Router>
       <div className="App">
@@ -58,27 +66,27 @@ function App() {
               <div className="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul className="navbar-nav">
                   <li className="nav-item">
-                    <Link className="nav-link" to="/home">Home</Link>
+                    <Link className="nav-link" to="/home" onClick={closeNavbar}>Home</Link>
                   </li>
                  
                   <li className="nav-item">
-                    <Link className="nav-link" to="/pickup">Pick Up</Link>
+                    <Link className="nav-link" to="/pickup" onClick={closeNavbar}>Pick Up</Link>
                   </li>
                   <li className="nav-item">
-                    <Link className="nav-link" to="/signin">Sign in</Link>
+                    <Link className="nav-link" to="/signin" onClick={closeNavbar}>Sign in</Link>
                   </li>
                   {/* TEMP: Sign Up link for testing */}
                   <li className="nav-item">
-                    <Link className="nav-link" to="/signup">Sign Up</Link>
+                    <Link className="nav-link" to="/signup" onClick={closeNavbar}>Sign Up</Link>
                   </li>
                    <li className="nav-item">
-                    <Link className="nav-link" to="/payments">Payments</Link>
+                    <Link className="nav-link" to="/payments" onClick={closeNavbar}>Payments</Link>
                   </li>
                    <li className="nav-item">
-                    <Link className="nav-link" to="/confirmation">Confirmation</Link>
+                    <Link className="nav-link" to="/confirmation" onClick={closeNavbar}>Confirmation</Link>
                   </li>
                    <li className="nav-item">
-                    <Link className="nav-link" to="/contact">Contact Us</Link>
+                    <Link className="nav-link" to="/contact" onClick={closeNavbar}>Contact Us</Link>
                   </li>
                 </ul>
               </div>

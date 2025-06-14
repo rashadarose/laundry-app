@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import bg1 from './images/bg1.jpg'; // Import your background image
+import { useNavigate } from 'react-router-dom';
+import bg1 from './images/bg1.jpg';
+import fng4 from './images/fng4.png'; // Import the logo
 
 function PickUp() {
   const [form, setForm] = useState({
@@ -10,7 +11,6 @@ function PickUp() {
     pickupTime: '',
     loadAmount: 1,
     dropoffTime: '',
-    user_id: '', // Add user_id field
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate(); // Initialize navigate
@@ -54,32 +54,29 @@ function PickUp() {
     setLoading(true);
     try {
       const price = form.loadAmount * 20; // Calculate price
+      // Generate a random user_id between 1 and 5
+      const user_id = Math.floor(Math.random() * 5) + 1;
       const response = await fetch('http://localhost:3002/api/pickups', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ ...form, price }) // Include price in the POST body
+        body: JSON.stringify({ ...form, price, user_id }) // Add user_id here
       });
       const data = await response.json();
       if (response.ok && data.success) {
-       
         alert(data.message || 'Pickup order created successfully!');
         // Redirect to payment page with price as state
         navigate('/payments', {
           state: {
             amount: price,
-            pickupInfo: form
+            pickupInfo: { ...form, user_id }
           }
         });
-        // Optionally reset form here if you want
-        // setForm({ ... });
       } else {
-         console.log(form)
         alert(data.error || 'Failed to create pickup order.');
       }
     } catch (err) {
-       console.log(form)
       alert('Error: ' + err.message);
     }
     setLoading(false);
@@ -103,6 +100,22 @@ function PickUp() {
           pointerEvents: 'none',
         }}
       />
+      {/* Logo above the title */}
+      <div className="text-center" style={{ position: 'relative', zIndex: 1 }}>
+        <img
+          src={fng4}
+          alt="Fold N Go Logo"
+          style={{
+            width: 100,
+            height: 100,
+            objectFit: 'contain',
+            marginBottom: 12,
+            background: 'rgba(255,255,255,0.85)',
+            borderRadius: 12,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.10)'
+          }}
+        />
+      </div>
       <h2 className="mb-4 text-center" style={{ position: 'relative', zIndex: 1 }}>Pick Up Order</h2>
       <form onSubmit={handleSubmit} style={{ position: 'relative', zIndex: 1 }}>
         <div className="mb-3">
@@ -236,23 +249,6 @@ function PickUp() {
             readOnly
             style={{
               background: '#e9ecef',
-              color: '#222',
-              border: '1px solid #86b7fe'
-            }}
-          />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="user_id" className="form-label">User ID</label>
-          <input
-            type="text"
-            className="form-control"
-            id="user_id"
-            name="user_id"
-            value={form.user_id}
-            onChange={handleChange}
-            required
-            style={{
-              background: '#cfe2ff',
               color: '#222',
               border: '1px solid #86b7fe'
             }}
