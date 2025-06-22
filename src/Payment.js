@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { useNavigate, useLocation } from 'react-router-dom'; // Import useLocation
+import { useNavigate, useLocation } from 'react-router-dom';
 import bg1 from './images/bg1.jpg';
 
 // Replace with your Stripe publishable key
@@ -9,8 +9,10 @@ const stripePromise = loadStripe('pk_test_51RZRSFE6vCQwJMVz7Nj5vmfMntJ6gHMp0jmd4
 
 function PaymentForm() {
     const location = useLocation();
+    const pickupInfo = location.state?.pickupInfo;
     const initialAmount = location.state?.amount || '';
     const [amount, setAmount] = useState(initialAmount);
+    const [phone, setPhone] = useState(pickupInfo?.phone || '');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const stripe = useStripe();
@@ -19,6 +21,14 @@ function PaymentForm() {
 
     const handleAmountChange = (e) => {
         setAmount(e.target.value);
+    };
+
+    const handlePhoneChange = (e) => {
+        setPhone(e.target.value);
+    };
+
+    const handleCancel = () => {
+        navigate('/pickup');
     };
 
     const handlePayment = async (e) => {
@@ -53,13 +63,15 @@ function PaymentForm() {
                 body: JSON.stringify({
                     amount: Math.round(Number(amount) * 100), // convert dollars to cents
                     paymentMethodId: paymentMethod.id,
+                    phone: phone // Send phone with req.body
                 }),
             });
             const data = await res.json();
             if (data.success) {
-                elements.getElement(CardElement).clear();
+                const card = elements.getElement(CardElement);
+                if (card) card.clear();
                 setAmount('');
-                navigate('/confirmation'); // Redirect to confirmation page
+                navigate('/confirmation');
             } else {
                 setMessage(data.error || 'Payment failed.');
             }
@@ -70,55 +82,98 @@ function PaymentForm() {
     };
 
     return (
-        <form onSubmit={handlePayment} style={{ position: 'relative', zIndex: 1 }}>
-            <div className="mb-3">
-                <label htmlFor="amount" className="form-label">Amount (USD)</label>
-                <input
-                    type="number"
-                    id="amount"
-                    name="amount"
-                    value={amount}
-                    onChange={handleAmountChange}
-                    required
-                    min="1"
-                    step="0.01"
-                    className="form-control"
-                    style={{
-                        background: '#cfe2ff',
-                        color: '#222',
-                        border: '1px solid #86b7fe'
-                    }}
-                />
-            </div>
-            <div className="mb-3">
-                <label className="form-label">Card Details</label>
-                <div
-                    style={{
-                        background: '#cfe2ff',
-                        border: '1px solid #86b7fe',
-                        borderRadius: 4,
-                        padding: '10px 12px'
-                    }}
-                >
-                    <CardElement
-                        options={{
-                            style: {
-                                base: {
-                                    fontSize: '16px',
-                                    color: '#222',
-                                    '::placeholder': { color: '#888' },
-                                    fontFamily: 'Lato, Arial, sans-serif',
-                                },
-                                invalid: { color: '#e5424d' },
-                            },
+        <div>
+            {/* Show pickup info if available */}
+            {pickupInfo && (
+                <div className="card mb-4">
+                    <div className="card-body">
+                        <h5 className="card-title">Pickup Details</h5>
+                        <p><strong>Name:</strong> {pickupInfo.name}</p>
+                        <p><strong>Address:</strong> {pickupInfo.address}</p>
+                        <p><strong>Pickup Date:</strong> {pickupInfo.pickupDate}</p>
+                        <p><strong>Pickup Time:</strong> {pickupInfo.pickupTime}</p>
+                        <p><strong>Dropoff Time:</strong> {pickupInfo.dropoffTime}</p>
+                        <p><strong>Load Amount:</strong> {pickupInfo.loadAmount}</p>
+                        <p><strong>Price:</strong> ${pickupInfo.loadAmount * 20}</p>
+                        <button
+                            type="button"
+                            className="btn btn-outline-danger mt-2"
+                            onClick={handleCancel}
+                        >
+                            Cancel &amp; Edit Pickup Info
+                        </button>
+                    </div>
+                </div>
+            )}
+            <form onSubmit={handlePayment} style={{ position: 'relative', zIndex: 1 }}>
+                <div className="mb-3">
+                    <label htmlFor="amount" className="form-label">Amount (USD)</label>
+                    <input
+                        type="number"
+                        id="amount"
+                        name="amount"
+                        value={amount}
+                        onChange={handleAmountChange}
+                        required
+                        min="1"
+                        step="0.01"
+                        className="form-control"
+                        style={{
+                            background: '#cfe2ff',
+                            color: '#222',
+                            border: '1px solid #86b7fe'
                         }}
                     />
                 </div>
-            </div>
-            <button type="submit" className="btn btn-primary w-100" disabled={loading || !stripe}>
-                {loading ? 'Processing...' : 'Pay Now'}
-            </button>
-        </form>
+                <div className="mb-3">
+                    <label className="form-label">Card Details</label>
+                    <div
+                        style={{
+                            background: '#cfe2ff',
+                            border: '1px solid #86b7fe',
+                            borderRadius: 4,
+                            padding: '10px 12px'
+                        }}
+                    >
+                        <CardElement
+                            options={{
+                                style: {
+                                    base: {
+                                        fontSize: '16px',
+                                        color: '#222',
+                                        '::placeholder': { color: '#888' },
+                                        fontFamily: 'Lato, Arial, sans-serif',
+                                    },
+                                    invalid: { color: '#e5424d' },
+                                },
+                            }}
+                        />
+                    </div>
+                </div>
+                <div className="mb-3">
+                    <label htmlFor="phone" className="form-label">Phone Number</label>
+                    <input
+                        type="tel"
+                        className="form-control"
+                        id="phone"
+                        name="phone"
+                        value={phone}
+                        onChange={handlePhoneChange}
+                        required
+                        pattern="[0-9]{10,15}"
+                        placeholder="Enter phone number"
+                        style={{
+                            background: '#cfe2ff',
+                            color: '#222',
+                            border: '1px solid #86b7fe'
+                        }}
+                    />
+                </div>
+                <button type="submit" className="btn btn-primary w-100" disabled={loading || !stripe}>
+                    {loading ? 'Processing...' : 'Pay Now'}
+                </button>
+            </form>
+        </div>
     );
 }
 

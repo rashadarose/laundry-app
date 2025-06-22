@@ -1,36 +1,30 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import bg1 from './images/bg1.jpg'; // Import your background image
 
 function SignIn() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [form, setForm] = useState({ identifier: '', password_hash: '' });
+  const [showFirstVisitModal, setShowFirstVisitModal] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleChange = e => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async e => {
     e.preventDefault();
-    fetch('http://localhost:3002/api/signin', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        identifier: email,
-        password_hash: password
-      })
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          alert('Sign in successful!');
-          navigate('/home'); // Redirect to home page
-        } else {
-          alert('Sign in failed: ' + (data.message || 'Invalid credentials'));
-        }
-      })
-      .catch(err => {
-        alert('Error: ' + err.message);
-      });
+    try {
+      const res = await axios.post('http://localhost:3002/api/signin', form);
+      if (res.data.user.isFirstVisit) {
+        setShowFirstVisitModal(true);
+      } else {
+        alert('Sign in successful!');
+        navigate('/home'); // Redirect to home page
+      }
+    } catch (err) {
+      alert(err.response?.data?.error || 'Sign in failed');
+    }
   };
 
   return (
@@ -54,13 +48,15 @@ function SignIn() {
       <h2 className="mb-4 text-center" style={{ position: 'relative', zIndex: 1 }}>Sign In</h2>
       <form onSubmit={handleSubmit} style={{ position: 'relative', zIndex: 1 }}>
         <div className="mb-3">
-          <label htmlFor="email" className="form-label">Email address</label>
+          <label htmlFor="identifier" className="form-label">Email or Name</label>
           <input
-            type="email"
+            type="text"
+            name="identifier"
             className="form-control"
-            id="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
+            id="identifier"
+            value={form.identifier}
+            onChange={handleChange}
+            placeholder="Email or Name"
             required
             autoFocus
             style={{
@@ -71,13 +67,15 @@ function SignIn() {
           />
         </div>
         <div className="mb-3">
-          <label htmlFor="password" className="form-label">Password</label>
+          <label htmlFor="password_hash" className="form-label">Password</label>
           <input
             type="password"
+            name="password_hash"
             className="form-control"
-            id="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
+            id="password_hash"
+            value={form.password_hash}
+            onChange={handleChange}
+            placeholder="Password"
             required
             style={{
               background: '#cfe2ff',
@@ -88,6 +86,18 @@ function SignIn() {
         </div>
         <button type="submit" className="btn btn-primary w-100" style={{ position: 'relative', zIndex: 1 }}>Sign In</button>
       </form>
+
+      {/* First Visit Modal */}
+      {showFirstVisitModal && (
+        <div className="modal-backdrop">
+          <div className="modal-content">
+            <h2>Welcome!</h2>
+            <p>This is your first visit. Please enter your zip code.</p>
+            {/* ...your zipcode input and logic here... */}
+            <button onClick={() => setShowFirstVisitModal(false)}>Close</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

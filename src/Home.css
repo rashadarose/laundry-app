@@ -56,6 +56,15 @@
     }
 }
 
+@media (max-width: 600px) {
+  #jumboLogo {
+    display: none;
+  }
+  #jumboTitle {
+    display: none;
+  }
+}
+
 body, html {
   overflow-x: hidden;
 }
