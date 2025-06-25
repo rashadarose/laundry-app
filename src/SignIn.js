@@ -15,7 +15,7 @@ function SignIn() {
   const handleSubmit = async e => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:3002/api/signin', form);
+      const res = await axios.post('http://18.119.73.76:3002/api/signin', form);
       if (res.data.user.isFirstVisit) {
         setShowFirstVisitModal(true);
       } else {

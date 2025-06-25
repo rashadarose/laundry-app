@@ -13,7 +13,7 @@ function SignUp() {
 
   // Fetch users from the endpoint
   const fetchUsers = () => {
-    fetch('http://localhost:3002/api/users')
+    fetch('http://18.119.73.76:3002/api/users')
       .then(res => res.json())
       .then(data => setUsers(data))
       .catch(err => console.error('Error fetching users:', err));
@@ -30,7 +30,7 @@ function SignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    fetch("http://localhost:3002/api/users", {
+    fetch("http://18.119.73.76:3002/api/users", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

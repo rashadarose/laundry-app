@@ -56,7 +56,7 @@ function PickUp() {
       const price = form.loadAmount * 20; // Calculate price
       // Generate a random user_id between 1 and 5
       const user_id = Math.floor(Math.random() * 5) + 1;
-      const response = await fetch('http://localhost:3002/api/pickups', {
+      const response = await fetch('http://18.119.73.76:3002/api/pickups', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
