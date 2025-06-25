@@ -15,7 +15,9 @@ function SignIn() {
   const handleSubmit = async e => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://18.119.73.76:3002/api/signin', form);
+      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002'; // Fallback to localhost if not set
+      // Make sure to replace with your actual API URL
+      const res = await axios.post(`${API_URL}/api/signin`, form);
       if (res.data.user.isFirstVisit) {
         setShowFirstVisitModal(true);
       } else {

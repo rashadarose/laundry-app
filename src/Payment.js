@@ -57,7 +57,8 @@ function PaymentForm() {
 
         // Call your backend to create a PaymentIntent and confirm payment
         try {
-            const res = await fetch('http://18.119.73.76:3002/api/checkout', {
+            const API_URL = process.env.REACT_APP_API_URL;
+            const res = await fetch(`${API_URL}/api/checkout`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

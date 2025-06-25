@@ -30,7 +30,9 @@ function SignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    fetch("http://18.119.73.76:3002/api/users", {
+    const API_URL = process.env.REACT_APP_API_URL;
+
+    fetch(`${API_URL}/api/users`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
