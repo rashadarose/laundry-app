@@ -12,8 +12,9 @@ function SignUp() {
   const [users, setUsers] = useState([]);
 
   // Fetch users from the endpoint
+  const API_URL = process.env.REACT_APP_API_URL; // Fallback to localhost if not set
   const fetchUsers = () => {
-    fetch('http://18.119.73.76:3002/api/users')
+    fetch(`${API_URL}/api/users`)
       .then(res => res.json())
       .then(data => setUsers(data))
       .catch(err => console.error('Error fetching users:', err));

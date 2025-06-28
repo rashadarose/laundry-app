@@ -15,14 +15,15 @@ function SignIn() {
   const handleSubmit = async e => {
     e.preventDefault();
     try {
-      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002'; // Fallback to localhost if not set
-      // Make sure to replace with your actual API URL
+      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
       const res = await axios.post(`${API_URL}/api/signin`, form);
       if (res.data.user.isFirstVisit) {
         setShowFirstVisitModal(true);
       } else {
+        // Set user id in localStorage for session
+        localStorage.setItem('laundry_token', res.data.user.id);
         alert('Sign in successful!');
-        navigate('/home'); // Redirect to home page
+        navigate('/home');
       }
     } catch (err) {
       alert(err.response?.data?.error || 'Sign in failed');
@@ -87,6 +88,27 @@ function SignIn() {
           />
         </div>
         <button type="submit" className="btn btn-primary w-100" style={{ position: 'relative', zIndex: 1 }}>Sign In</button>
+        {/* Inline sign up prompt */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginTop: 10,
+            fontSize: '0.97rem',
+            color: '#444'
+          }}
+        >
+          <span style={{ marginRight: 6 }}>New to Fold N Go?</span>
+          <button
+            type="button"
+            className="btn btn-outline-secondary btn-sm"
+            style={{ fontSize: '0.92rem', padding: '2px 10px', lineHeight: 1 }}
+            onClick={() => navigate('/signup')}
+          >
+            Sign Up
+          </button>
+        </div>
       </form>
 
       {/* First Visit Modal */}

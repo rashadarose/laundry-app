@@ -1,19 +1,54 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import bg1 from './images/bg1.jpg';
-import fng4 from './images/fng4.png'; // Import the logo
+import fng4 from './images/fng4.png';
 
 function PickUp() {
   const [form, setForm] = useState({
     name: '',
     address: '',
+    city: '',
+    zip: '',
     pickupDate: '',
     pickupTime: '',
     loadAmount: 1,
     dropoffTime: '',
   });
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate(); // Initialize navigate
+  const [showAuthAlert, setShowAuthAlert] = useState(false);
+  const navigate = useNavigate();
+
+  // Fetch user info if signed in
+  useEffect(() => {
+    const token = localStorage.getItem('laundry_token');
+    if (!token) {
+      setShowAuthAlert(true);
+    } else {
+      // Fetch user info from API
+      const API_URL = process.env.REACT_APP_API_URL;
+      fetch(`${API_URL}/api/users/${token}`)
+        .then(res => res.json())
+        .then(user => {
+          setForm(prev => ({
+            ...prev,
+            name: user.name || '',
+            address: user.address ? user.address.split(',')[0] : '',
+            city: user.address ? user.address.split(',')[1]?.trim() || '' : '',
+            zip: user.address ? user.address.split(',')[2]?.trim() || '' : '',
+          }));
+        })
+        .catch(() => {});
+    }
+  }, []);
+
+  const handleSignIn = () => {
+    setShowAuthAlert(false);
+    navigate('/signin');
+  };
+
+  const handleContinueGuest = () => {
+    setShowAuthAlert(false);
+  };
 
   // Generate time options in 30-minute intervals
   const generateTimeOptions = () => {
@@ -54,15 +89,30 @@ function PickUp() {
     setLoading(true);
     try {
       const price = form.loadAmount * 20; // Calculate price
-      // Generate a random user_id between 1 and 5
-      const user_id = Math.floor(Math.random() * 5) + 1;
+
+      // Use user_id from token if signed in, otherwise use guest id = 2
+      let user_id = 2; // default to guest
+      const token = localStorage.getItem('laundry_token');
+      if (token) {
+        // If you store user_id in the token, parse it here.
+        // For example, if token is just the user_id:
+        user_id = Number(token);
+
+        // If your token is a JWT or JSON, parse accordingly:
+        // const user = JSON.parse(atob(token.split('.')[1]));
+        // user_id = user.id;
+      }
+
+      // Concatenate address, city, and zip for the address field
+      const fullAddress = `${form.address}, ${form.city}, ${form.zip}`;
+
       const API_URL = process.env.REACT_APP_API_URL;
       const response = await fetch(`${API_URL}/api/pickups`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ ...form, price, user_id }) // Add user_id here
+        body: JSON.stringify({ ...form, address: fullAddress, price, user_id })
       });
       const data = await response.json();
       if (response.ok && data.success) {
@@ -71,7 +121,7 @@ function PickUp() {
         navigate('/payments', {
           state: {
             amount: price,
-            pickupInfo: { ...form, user_id }
+            pickupInfo: { ...form, address: fullAddress, user_id }
           }
         });
       } else {
@@ -85,6 +135,42 @@ function PickUp() {
 
   return (
     <div className="container mt-5" style={{ maxWidth: '500px', position: 'relative', zIndex: 1 }}>
+      {/* Auth Alert Modal */}
+      {showAuthAlert && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, width: '100vw', height: '100vh',
+            background: 'rgba(0,0,0,0.45)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 12,
+              padding: '32px 24px',
+              maxWidth: 350,
+              width: '90%',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
+              textAlign: 'center'
+            }}
+          >
+            <h4 className="mb-3">Welcome!</h4>
+            <p>Would you like to sign in or continue as a guest?</p>
+            <button className="btn btn-primary w-100 mb-2" onClick={handleSignIn}>
+              Sign In
+            </button>
+            <button className="btn btn-outline-secondary w-100" onClick={handleContinueGuest}>
+              Continue as Guest
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Transparent background image */}
       <div
         style={{
@@ -111,9 +197,9 @@ function PickUp() {
             height: 100,
             objectFit: 'contain',
             marginBottom: 12,
-            background: 'rgba(255,255,255,0.85)',
-            borderRadius: 12,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.10)'
+            // background: 'rgba(255,255,255,0.85)',
+            // borderRadius: 12,
+            // boxShadow: '0 2px 8px rgba(0,0,0,0.10)'
           }}
         />
       </div>
@@ -147,12 +233,51 @@ function PickUp() {
             value={form.address}
             onChange={handleChange}
             required
+            placeholder="Street Address"
             style={{
               background: '#cfe2ff',
               color: '#222',
               border: '1px solid #86b7fe'
             }}
           />
+          {/* City and Zip Code fields inline */}
+          <div style={{ display: 'flex', gap: '8px', marginTop: 8 }}>
+            <input
+              type="text"
+              className="form-control"
+              id="city"
+              name="city"
+              value={form.city || ''}
+              onChange={handleChange}
+              required
+              placeholder="City"
+              style={{
+                background: '#e9ecef',
+                color: '#222',
+                border: '1px solid #86b7fe',
+                fontSize: '0.95rem',
+                width: '60%'
+              }}
+            />
+            <input
+              type="text"
+              className="form-control"
+              id="zip"
+              name="zip"
+              value={form.zip || ''}
+              onChange={handleChange}
+              required
+              placeholder="Zip"
+              style={{
+                background: '#e9ecef',
+                color: '#222',
+                border: '1px solid #86b7fe',
+                fontSize: '0.95rem',
+                width: '40%'
+              }}
+              maxLength={10}
+            />
+          </div>
         </div>
         <div className="mb-3">
           <label htmlFor="pickupDate" className="form-label">Pick Up Date</label>

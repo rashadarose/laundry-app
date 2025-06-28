@@ -36,9 +36,9 @@ const Contact = () => {
                         height: 100,
                         objectFit: 'contain',
                         marginBottom: 12,
-                        background: 'rgba(255,255,255,0.85)',
-                        borderRadius: 12,
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
+                        // background: 'rgba(255,255,255,0.85)',
+                        // borderRadius: 12,
+                        // boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
                     }}
                 />
             </div>

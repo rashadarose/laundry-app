@@ -66,9 +66,9 @@ function Home() {
                             height: 180,
                             objectFit: 'contain',
                             marginBottom: 20,
-                            background: 'rgba(255,255,255,0.85)',
-                            borderRadius: 16,
-                            boxShadow: '0 2px 12px rgba(0,0,0,0.12)'
+                            // background: 'rgba(255,255,255,0.85)',
+                            // borderRadius: 16,
+                            // boxShadow: '0 2px 12px rgba(0,0,0,0.12)'
                         }}
                     />
                     <h1 id="jumboTitle"

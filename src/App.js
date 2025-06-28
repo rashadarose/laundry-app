@@ -11,6 +11,10 @@ import Contact from './Contact';
 import Payment from './Payment';
 import Confirmation from './Confirmation';  
 import PickUpConfirmation from './PickUpConfirmation';
+import ComingSoon from './ComingSoon'; 
+import Services from './ServicesPage'; 
+import FAQ from './FAQ';
+import Policy from './Policy'; 
 import React, { useEffect, useState } from 'react';
 
 // Houston metro area zip codes (partial list, add more as needed)
@@ -99,6 +103,10 @@ function App() {
                   <li className="nav-item">
                     <Link className="nav-link" to="/pickup" onClick={closeNavbar}>Pick Up</Link>
                   </li>
+                  
+                  {/* <li className="nav-item">
+                    <Link className="nav-link" to="/services" onClick={closeNavbar}>Services</Link>
+                  </li> */}
                   {/* <li className="nav-item">
                     <Link className="nav-link" to="/pickupconfirmation" onClick={closeNavbar}>Pick Up Confirm</Link>
                   </li> */}
@@ -109,12 +117,15 @@ function App() {
                   <li className="nav-item">
                     <Link className="nav-link" to="/signup" onClick={closeNavbar}>Sign Up</Link>
                   </li>
-                   <li className="nav-item">
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/faq" onClick={closeNavbar}>FAQs</Link>
+                  </li>
+                   {/* <li className="nav-item">
                     <Link className="nav-link" to="/payments" onClick={closeNavbar}>Payments</Link>
-                  </li>
-                   <li className="nav-item">
+                  </li> */}
+                   {/* <li className="nav-item">
                     <Link className="nav-link" to="/confirmation" onClick={closeNavbar}>Confirmation</Link>
-                  </li>
+                  </li> */}
                    <li className="nav-item">
                     <Link className="nav-link" to="/contact" onClick={closeNavbar}>Contact Us</Link>
                   </li>
@@ -129,10 +140,14 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/contact" element={<Contact />} /> {/* This connects the Contact page */}
             <Route path="/pickup" element={<PickUp />} />
+            <Route path="/services" element={<Services />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/payments" element={<Payment />} />
             <Route path="/confirmation" element={<Confirmation />} />
+              <Route path="/comingsoon" element={<ComingSoon />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/policy" element={<Policy />} />
             {/* <Route path="/pickupconfirmation" element={<PickUpConfirmation />} /> */}
             {/* Default route */}
             <Route path="/" element={<Home />} />
@@ -162,9 +177,11 @@ function App() {
                 <h6 className="text-uppercase fw-bold mb-3">Services</h6>
                 <ul className="list-unstyled">
                   <li>
+                   <Link to = "/services" onClick={closeNavbar} >
                     <button type="button" className="text-white-50 text-decoration-none btn btn-link p-0" style={{ textAlign: 'left' }}>
                       Wash &amp; Fold
                     </button>
+                    </Link>
                   </li>
                   <li>
                     <button type="button" className="text-white-50 text-decoration-none btn btn-link p-0" style={{ textAlign: 'left' }}>
@@ -193,19 +210,26 @@ function App() {
                     </button>
                   </li>
                   <li>
+                  <Link to = "/comingsoon" onClick={closeNavbar} >
                     <button type="button" className="text-white-50 text-decoration-none btn btn-link p-0" style={{ textAlign: 'left' }}>
                       Careers
                     </button>
+                    </Link>
                   </li>
                   <li>
+                  <Link to = "/comingsoon" onClick={closeNavbar} >
                     <button type="button" className="text-white-50 text-decoration-none btn btn-link p-0" style={{ textAlign: 'left' }}>
                       Blog
                     </button>
+                    </Link>
                   </li>
+                  
                   <li>
+                   <Link to = "/contact" onClick={closeNavbar} >
                     <button type="button" className="text-white-50 text-decoration-none btn btn-link p-0" style={{ textAlign: 'left' }}>
                       Contact
                     </button>
+                    </Link>
                   </li>
                 </ul>
               </div>
@@ -214,7 +238,9 @@ function App() {
                 <h6 className="text-uppercase fw-bold mb-3">Legal &amp; Help</h6>
                 <ul className="list-unstyled">
                   <li>
-                    <a href="/privacy-policy" className="text-white-50 text-decoration-none">Privacy Policy</a>
+                     <Link to = "/policy" className="text-white-50 text-decoration-none" onClick={closeNavbar} >
+                    Privacy Policy
+                    </Link>
                   </li>
                   <li>
                     <a href="/terms-of-service" className="text-white-50 text-decoration-none">Terms of Service</a>
@@ -248,7 +274,7 @@ function App() {
             </div>
             <hr className="my-4 border-secondary" />
             <div className="text-center small">
-              &copy; {new Date().getFullYear()} LaundryApp. All rights reserved. &nbsp;|&nbsp;
+              &copy; {new Date().getFullYear()} Vibi Media LLC. All rights reserved. &nbsp;|&nbsp;
               <a href="/privacy-policy" className="text-white-50 text-decoration-none">Privacy Policy</a> &nbsp;|&nbsp;
               <a href="/terms-of-service" className="text-white-50 text-decoration-none">Terms of Service</a>
             </div>

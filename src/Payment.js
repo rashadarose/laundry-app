@@ -5,23 +5,24 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import bg1 from './images/bg1.jpg';
 
 // Replace with your Stripe publishable key
-const stripePromise = loadStripe('pk_test_51RZRSFE6vCQwJMVz7Nj5vmfMntJ6gHMp0jmd4xQtyUk6QTcFTAvTihv84lRXcJGpuxRb9WxclGRL2g1BhGe0Xcs500EpIznWvt');
+const stripePromise = loadStripe('pk_test_51RZQ4BDsSHsghj1lHq3hRKZ1W6J1t1ZtQHhBVbmjY3d9tFSrAeu6cOX8Evm5MBbrLXmz7i4hTqYg5I3I5gHqZIMT00chpM9blL');
 
 function PaymentForm() {
     const location = useLocation();
     const pickupInfo = location.state?.pickupInfo;
-    const initialAmount = location.state?.amount || '';
-    const [amount, setAmount] = useState(initialAmount);
+    const baseAmount = pickupInfo ? pickupInfo.loadAmount * 20 : 0;
+    const processingFee = 4.50;
+    const taxRate = 0.0825; // 8.25% tax, adjust as needed
+    const taxes = +(baseAmount * taxRate).toFixed(2);
+    const totalAmount = +(baseAmount + processingFee + taxes).toFixed(2);
+
+    const [amount, setAmount] = useState(totalAmount);
     const [phone, setPhone] = useState(pickupInfo?.phone || '');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const stripe = useStripe();
     const elements = useElements();
     const navigate = useNavigate();
-
-    const handleAmountChange = (e) => {
-        setAmount(e.target.value);
-    };
 
     const handlePhoneChange = (e) => {
         setPhone(e.target.value);
@@ -62,7 +63,7 @@ function PaymentForm() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    amount: Math.round(Number(amount) * 100), // convert dollars to cents
+                    amount: Math.round(Number(totalAmount) * 100), // convert dollars to cents
                     paymentMethodId: paymentMethod.id,
                     phone: phone // Send phone with req.body
                 }),
@@ -72,7 +73,10 @@ function PaymentForm() {
                 const card = elements.getElement(CardElement);
                 if (card) card.clear();
                 setAmount('');
-                navigate('/confirmation');
+                // Store confirmation data in localStorage
+                localStorage.setItem('confirmation_pickupInfo', JSON.stringify(pickupInfo));
+                localStorage.setItem('confirmation_amount', totalAmount);
+                navigate('/confirmation', { state: { pickupInfo, amount: totalAmount } });
             } else {
                 setMessage(data.error || 'Payment failed.');
             }
@@ -95,7 +99,12 @@ function PaymentForm() {
                         <p><strong>Pickup Time:</strong> {pickupInfo.pickupTime}</p>
                         <p><strong>Dropoff Time:</strong> {pickupInfo.dropoffTime}</p>
                         <p><strong>Load Amount:</strong> {pickupInfo.loadAmount}</p>
-                        <p><strong>Price:</strong> ${pickupInfo.loadAmount * 20}</p>
+                        <p><strong>Base Price:</strong> ${baseAmount.toFixed(2)}</p>
+                        <p><strong>Processing Fee:</strong> ${processingFee.toFixed(2)}</p>
+                        <p><strong>Taxes:</strong> ${taxes.toFixed(2)}</p>
+                        <p style={{ fontWeight: 600, fontSize: '1.1rem' }}>
+                            Total: <span style={{ color: '#007bff' }}>${totalAmount.toFixed(2)}</span>
+                        </p>
                         <button
                             type="button"
                             className="btn btn-outline-danger mt-2"
@@ -109,22 +118,37 @@ function PaymentForm() {
             <form onSubmit={handlePayment} style={{ position: 'relative', zIndex: 1 }}>
                 <div className="mb-3">
                     <label htmlFor="amount" className="form-label">Amount (USD)</label>
-                    <input
-                        type="number"
-                        id="amount"
-                        name="amount"
-                        value={amount}
-                        onChange={handleAmountChange}
-                        required
-                        min="1"
-                        step="0.01"
-                        className="form-control"
-                        style={{
-                            background: '#cfe2ff',
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{
+                            background: '#e9ecef',
+                            border: '1px solid #86b7fe',
+                            borderRight: 'none',
                             color: '#222',
-                            border: '1px solid #86b7fe'
-                        }}
-                    />
+                            padding: '0.375rem 0.75rem',
+                            borderRadius: '4px 0 0 4px',
+                            fontWeight: 500,
+                            fontSize: '1rem'
+                        }}>$</span>
+                        <input
+                            type="text"
+                            id="amount"
+                            name="amount"
+                            value={totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            readOnly
+                            disabled
+                            required
+                            className="form-control"
+                            style={{
+                                background: '#e9ecef',
+                                color: '#222',
+                                border: '1px solid #86b7fe',
+                                borderLeft: 'none',
+                                borderRadius: '0 4px 4px 0',
+                                fontWeight: 500,
+                                fontSize: '1rem'
+                            }}
+                        />
+                    </div>
                 </div>
                 <div className="mb-3">
                     <label className="form-label">Card Details</label>
@@ -174,6 +198,9 @@ function PaymentForm() {
                     {loading ? 'Processing...' : 'Pay Now'}
                 </button>
             </form>
+            {message && (
+                <div className="alert alert-danger mt-3">{message}</div>
+            )}
         </div>
     );
 }
