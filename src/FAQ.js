@@ -1,5 +1,5 @@
 import React from 'react';
-
+import bg1 from './images/bg1.jpg';
 const faqs = [
     {
         question: "What services do you offer?",
@@ -30,6 +30,21 @@ const faqs = [
 function FAQ() {
     return (
         <div style={{ maxWidth: 700, margin: '0 auto', padding: 24 }}>
+         <div
+                style={{
+                    backgroundImage: `url(${bg1})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    opacity: 0.07,
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    zIndex: 0,
+                    pointerEvents: 'none',
+                }}
+            />
             <h1>Frequently Asked Questions</h1>
             <ul style={{ listStyle: 'none', padding: 0 }}>
                 {faqs.map((faq, idx) => (

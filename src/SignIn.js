@@ -4,7 +4,7 @@ import axios from 'axios';
 import bg1 from './images/bg1.jpg'; // Import your background image
 
 function SignIn() {
-  const [form, setForm] = useState({ identifier: '', password_hash: '' });
+  const [form, setForm] = useState({ identifier: '', password: '' });
   const [showFirstVisitModal, setShowFirstVisitModal] = useState(false);
   const navigate = useNavigate();
 
@@ -15,7 +15,7 @@ function SignIn() {
   const handleSubmit = async e => {
     e.preventDefault();
     try {
-      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
+      const API_URL = process.env.REACT_APP_API_URL || 'https://localhost:3002';
       const res = await axios.post(`${API_URL}/api/signin`, form);
       if (res.data.user.isFirstVisit) {
         setShowFirstVisitModal(true);
@@ -70,13 +70,13 @@ function SignIn() {
           />
         </div>
         <div className="mb-3">
-          <label htmlFor="password_hash" className="form-label">Password</label>
+          <label htmlFor="password" className="form-label">Password</label>
           <input
             type="password"
-            name="password_hash"
+            name="password"
             className="form-control"
-            id="password_hash"
-            value={form.password_hash}
+            id="password"
+            value={form.password}
             onChange={handleChange}
             placeholder="Password"
             required
@@ -102,7 +102,7 @@ function SignIn() {
           <span style={{ marginRight: 6 }}>New to Fold N Go?</span>
           <button
             type="button"
-            className="btn btn-outline-secondary btn-sm"
+            className="btn btn-success btn-sm" // Changed from btn-outline-secondary to btn-success (green)
             style={{ fontSize: '0.92rem', padding: '2px 10px', lineHeight: 1 }}
             onClick={() => navigate('/signup')}
           >

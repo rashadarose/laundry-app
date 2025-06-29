@@ -167,7 +167,7 @@ function SignUp() {
         </form>
 
         {/* List users below the form */}
-      <div className="mt-5">
+      {/* <div className="mt-5">
         <h4 className="mb-3">Registered Users</h4>
         <ul className="list-group">
           {users.length === 0 && <li className="list-group-item">No users found.</li>}
@@ -177,7 +177,7 @@ function SignUp() {
             </li>
           ))}
         </ul>
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -1,11 +1,6 @@
 import React from 'react';
-import bg1 from './images/bg1.jpg'; // Import your background image
-import fng4 from './images/fng4.png'; // Import the logo
-
-const HOUSTON_COORDS = {
-    lat: 29.7604,
-    lng: -95.3698,
-};
+import bg1 from './images/bg1.jpg';
+import fng4 from './images/fng4.png';
 
 const Contact = () => {
     return (
@@ -16,7 +11,7 @@ const Contact = () => {
                     backgroundImage: `url(${bg1})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
-                    opacity: 0.07, // Even less opacity for this page
+                    opacity: 0.07,
                     position: 'fixed',
                     top: 0,
                     left: 0,
@@ -36,9 +31,6 @@ const Contact = () => {
                         height: 100,
                         objectFit: 'contain',
                         marginBottom: 12,
-                        // background: 'rgba(255,255,255,0.85)',
-                        // borderRadius: 12,
-                        // boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
                     }}
                 />
             </div>
@@ -47,29 +39,30 @@ const Contact = () => {
             </h2>
             <h2>Houston Location</h2>
             <p>
-                <strong>Address:</strong> 1234 Main St, Houston, TX 77001
+                <strong>Address:</strong> 1818 Fannin Speedway, Houston, TX 77045
             </p>
             <p>
-                <strong>Phone:</strong> (555) 123-4567
+                <strong>Phone:</strong> (973) 752-8237
             </p>
             <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, urna eu tincidunt consectetur, nisi nisl aliquam nunc, eget aliquam massa nisl quis neque.
+                Welcome to Fold N Go! We’re your trusted laundry partner in Houston, dedicated to making laundry day easy, fast, and worry-free. Whether you have questions about our services, need help with an order, or just want to say hello, our friendly team is here for you.
             </p>
             <p>
-                Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.
+                Visit us at our convenient Houston location or give us a call. We pride ourselves on excellent customer service and quick responses. Your satisfaction is our top priority!
             </p>
             <p>
-                For more information, please reach out to our team. We are happy to assist you with any questions or concerns.
+                Need help now? Call us at <strong>(973) 752-8237</strong> or stop by our store. We look forward to serving you!
             </p>
-            {/* Houston Map */}
+            {/* Google Map */}
             <h2 className="mt-4">Our Location: Houston, TX</h2>
             <div className="map-container" style={{ marginTop: '2rem' }}>
                 <iframe
-                    title="Houston Map"
+                    title="Google Map - Fold N Go Houston"
                     width="100%"
                     height="300"
                     frameBorder="0"
-                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${HOUSTON_COORDS.lng - 0.1}%2C${HOUSTON_COORDS.lat - 0.1}%2C${HOUSTON_COORDS.lng + 0.1}%2C${HOUSTON_COORDS.lat + 0.1}&layer=mapnik&marker=${HOUSTON_COORDS.lat}%2C${HOUSTON_COORDS.lng}`}
+                    style={{ border: 0 }}
+                    src="https://www.google.com/maps?q=1818+Fannin+Speedway,+Houston,+TX+77045&output=embed"
                     allowFullScreen
                 ></iframe>
             </div>

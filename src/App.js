@@ -14,7 +14,9 @@ import PickUpConfirmation from './PickUpConfirmation';
 import ComingSoon from './ComingSoon'; 
 import Services from './ServicesPage'; 
 import FAQ from './FAQ';
-import Policy from './Policy'; 
+import Policy from './Policy';
+import Dashboard from './Dashboard'; 
+import Terms from './Terms';
 import React, { useEffect, useState } from 'react';
 
 // Houston metro area zip codes (partial list, add more as needed)
@@ -29,6 +31,12 @@ function App() {
   const [showZipModal, setShowZipModal] = useState(false);
   const [zipInput, setZipInput] = useState('');
   const [zipError, setZipError] = useState('');
+
+  // Admin modal state
+  const [showAdminModal, setShowAdminModal] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminError, setAdminError] = useState('');
+  const [navigateToDashboard, setNavigateToDashboard] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -59,6 +67,46 @@ function App() {
       setZipError('Sorry, we only serve the Houston metro area.');
     }
   };
+
+  // Handle dashboard link click
+  const handleDashboardClick = (e) => {
+    e.preventDefault();
+    setShowAdminModal(true);
+    //setAdminPassword('');
+    setAdminError('');
+  };
+
+  // Handle admin password submit
+  const handleAdminSubmit = async (e) => {
+    e.preventDefault();
+    if (!adminPassword) {
+      setAdminError('Please enter the admin password.');
+      return;
+    }
+    // Try to verify password with backend
+    try {
+      const API_URL = process.env.REACT_APP_API_URL || 'https://localhost:3002';
+      const res = await fetch(`${API_URL}/admin?admin_secret=${adminPassword}`);
+      if (res.status === 403) {
+        setAdminError('Incorrect admin password.');
+        return;
+      }
+      // Success: store and navigate
+      sessionStorage.setItem('admin_secret', adminPassword);
+      setShowAdminModal(false);
+      setNavigateToDashboard(true);
+    } catch {
+      setAdminError('Network error. Try again.');
+    }
+  };
+
+  // Navigate to dashboard after modal closes and password is set
+  useEffect(() => {
+    if (navigateToDashboard) {
+      setNavigateToDashboard(false);
+      window.location.href = '/dashboard';
+    }
+  }, [navigateToDashboard]);
 
   function closeNavbar() {
     const navbarToggler = document.querySelector('.navbar-toggler');
@@ -114,12 +162,12 @@ function App() {
                     <Link className="nav-link" to="/signin" onClick={closeNavbar}>Sign in</Link>
                   </li>
                   {/* TEMP: Sign Up link for testing */}
-                  <li className="nav-item">
+                  {/* <li className="nav-item">
                     <Link className="nav-link" to="/signup" onClick={closeNavbar}>Sign Up</Link>
                   </li>
                   <li className="nav-item">
                     <Link className="nav-link" to="/faq" onClick={closeNavbar}>FAQs</Link>
-                  </li>
+                  </li> */}
                    {/* <li className="nav-item">
                     <Link className="nav-link" to="/payments" onClick={closeNavbar}>Payments</Link>
                   </li> */}
@@ -148,6 +196,8 @@ function App() {
               <Route path="/comingsoon" element={<ComingSoon />} />
               <Route path="/faq" element={<FAQ />} />
               <Route path="/policy" element={<Policy />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/terms-of-service" element={<Terms />} />
             {/* <Route path="/pickupconfirmation" element={<PickUpConfirmation />} /> */}
             {/* Default route */}
             <Route path="/" element={<Home />} />
@@ -233,23 +283,35 @@ function App() {
                   </li>
                 </ul>
               </div>
-              {/* Legal & Help */}
+             { /* Legal & Help */}
               <div className="col-md-3 mb-4 mb-md-0">
                 <h6 className="text-uppercase fw-bold mb-3">Legal &amp; Help</h6>
                 <ul className="list-unstyled">
                   <li>
-                     <Link to = "/policy" className="text-white-50 text-decoration-none" onClick={closeNavbar} >
-                    Privacy Policy
+                    <Link to="/policy" className="text-white-50 text-decoration-none" onClick={closeNavbar}>
+                      Privacy Policy
                     </Link>
                   </li>
                   <li>
-                    <a href="/terms-of-service" className="text-white-50 text-decoration-none">Terms of Service</a>
+                    <Link to="/terms-of-service" className="text-white-50 text-decoration-none" onClick={closeNavbar}>Terms of Service</Link>
                   </li>
                   <li>
-                    <a href="/faq" className="text-white-50 text-decoration-none">FAQs</a>
+                    <Link to="/faq" className="text-white-50 text-decoration-none"  onClick={closeNavbar}>FAQs</Link>
                   </li>
                   <li>
                     <a href="/support" className="text-white-50 text-decoration-none">Support</a>
+                  </li>
+                  <li>
+                    <Link
+                      to="/dashboard"
+                      className="text-white-50 text-decoration-none"
+                      onClick={e => {
+                        closeNavbar();
+                        handleDashboardClick(e);
+                      }}
+                    >
+                      Admin
+                    </Link>
                   </li>
                 </ul>
               </div>
@@ -320,6 +382,57 @@ function App() {
                 />
                 {zipError && <div className="text-danger mb-2">{zipError}</div>}
                 <button type="submit" className="btn btn-primary w-100">Continue</button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Admin Password Modal */}
+        {showAdminModal && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0, left: 0, width: '100vw', height: '100vh',
+              background: 'rgba(0,0,0,0.45)',
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <div
+              style={{
+                background: '#fff',
+                borderRadius: 12,
+                padding: '32px 24px',
+                maxWidth: 350,
+                width: '90%',
+                boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
+                textAlign: 'center'
+              }}
+            >
+              <h4 className="mb-3">Admin Login</h4>
+              <form onSubmit={handleAdminSubmit}>
+                <input
+                  type="password"
+                  className="form-control mb-2"
+                  placeholder="Enter admin password"
+                  value={adminPassword}
+                  onChange={e => setAdminPassword(e.target.value)}
+                  style={{ textAlign: 'center', fontSize: '1.2rem' }}
+                  autoFocus
+                  required
+                />
+                {adminError && <div className="text-danger mb-2">{adminError}</div>}
+                <button type="submit" className="btn btn-primary w-100">Continue</button>
+                <button
+                  type="button"
+                  className="btn btn-link w-100 text-decoration-none"
+                  onClick={() => setShowAdminModal(false)}
+                  style={{ color: '#007bff' }}
+                >
+                  Cancel
+                </button>
               </form>
             </div>
           </div>
