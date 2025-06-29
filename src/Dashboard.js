@@ -12,6 +12,7 @@ const STATUS_OPTIONS = [
 ];
 
 const API_URL = process.env.REACT_APP_API_URL || 'https://localhost:3002';
+const ADMIN_API = process.env.ADMIN_API || 'https://localhost:3002';
 //const secret = process.env.REACT_APP_ADMIN_SECRET;
 function Dashboard() {
   const [secret, setSecret] = useState('');
@@ -41,7 +42,7 @@ function Dashboard() {
     setMessage('');
     try {
       const secretToUse = adminSecret || sessionStorage.getItem('admin_secret');
-      const res = await fetch(`${API_URL}/admin`);
+      const res = await fetch(`${ADMIN_API}/admin`);
       const text = await res.text();
       console.log('ADMIN RESPONSE:', text);
       try {
