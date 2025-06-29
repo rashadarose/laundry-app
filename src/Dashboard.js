@@ -99,7 +99,9 @@ function Dashboard() {
           type="password"
           className="form-control"
           value={secret}
-          readOnly
+          onChange={e => setSecret(e.target.value)}
+          placeholder="Enter admin secret"
+          autoFocus    
           style={{ maxWidth: 300, display: 'inline-block', marginRight: 10 }}
         />
         <button className="btn btn-primary" onClick={() => fetchOrders()} disabled={loading}>
