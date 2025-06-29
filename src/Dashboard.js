@@ -43,6 +43,7 @@ function Dashboard() {
       const secretToUse = adminSecret || sessionStorage.getItem('admin_secret');
       const res = await fetch(`${API_URL}/admin?admin_secret=${secretToUse}`);
       const text = await res.text();
+      console.log('ADMIN RESPONSE:', text);
       try {
         const data = JSON.parse(text);
         setOrders(data);
