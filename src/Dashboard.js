@@ -12,7 +12,7 @@ const STATUS_OPTIONS = [
 ];
 
 const API_URL = process.env.REACT_APP_API_URL || 'https://localhost:3002';
-const ADMIN_API = process.env.ADMIN_API || 'https://localhost:3002';
+const ADMIN_API = process.env.ADMIN_API;
 //const secret = process.env.REACT_APP_ADMIN_SECRET;
 function Dashboard() {
   const [secret, setSecret] = useState('');
