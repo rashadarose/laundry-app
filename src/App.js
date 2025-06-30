@@ -86,7 +86,7 @@ function App() {
     // Try to verify password with backend
     try {
       const API_URL = process.env.REACT_APP_API_URL || 'https://localhost:3002';
-      const res = await fetch(`${API_URL}/admin?admin_secret=${adminPassword}`);
+      const res = await fetch(`${API_URL}/api/admin?admin_secret=${adminPassword}`);
       if (res.status === 403) {
         setAdminError('Incorrect admin password.');
         return;

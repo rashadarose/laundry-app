@@ -41,7 +41,7 @@ function Dashboard() {
     setMessage('');
     try {
       const secretToUse = adminSecret || sessionStorage.getItem('admin_secret');
-      const res = await fetch(`${API_URL}/admin`);
+      const res = await fetch(`${API_URL}/api/admin`);
       const text = await res.text();
       console.log('ADMIN RESPONSE:', text);
       try {
