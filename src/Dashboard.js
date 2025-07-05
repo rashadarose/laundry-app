@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const STATUS_OPTIONS = [  
+const STATUS_OPTIONS = [
   'received',
   'washing',
   'washed',
@@ -12,45 +12,45 @@ const STATUS_OPTIONS = [
 ];
 
 const API_URL = process.env.REACT_APP_API_URL || 'https://localhost:3002';
-//const secret = process.env.REACT_APP_ADMIN_SECRET;
+
 function Dashboard() {
-  const [secret, setSecret] = useState('');
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState({});
   const [message, setMessage] = useState('');
   const [checkingAuth, setCheckingAuth] = useState(true);
   const navigate = useNavigate();
-  
-  // Only allow access if admin_secret is present in sessionStorage
+
+  // Check for JWT and fetch orders on mount
   useEffect(() => {
-    const storedSecret = sessionStorage.getItem('admin_secret');
-    if (!storedSecret) {
+    const jwt = sessionStorage.getItem('admin_jwt');
+    if (!jwt) {
       navigate('/home', { replace: true });
-    } else {
-      setSecret(storedSecret);
-      setCheckingAuth(false);
-      fetchOrders(storedSecret);
+      return;
     }
+    fetchOrders(jwt);
+    setCheckingAuth(false);
     // eslint-disable-next-line
   }, []);
 
-  // Always use the secret from sessionStorage for API calls
-  const fetchOrders = async (adminSecret) => {
+  // Fetch orders with JWT
+  const fetchOrders = async (jwt) => {
     setLoading(true);
     setMessage('');
     try {
-      const secretToUse = adminSecret || sessionStorage.getItem('admin_secret');
-      const res = await fetch(`${API_URL}/api/admin`);
-      const text = await res.text();
-      console.log('ADMIN RESPONSE:', text);
-      try {
-        const data = JSON.parse(text);
-        setOrders(data);
-        setSecret(secretToUse);
-      } catch {
-        setMessage('Server error or invalid admin secret.');
+      const res = await fetch(`${API_URL}/api/admin/orders`, {
+        headers: {
+          'Authorization': `Bearer ${jwt}`,
+        },
+      });
+      if (res.status === 401 || res.status === 403) {
+        setMessage('Unauthorized. Please sign in as admin.');
+        sessionStorage.removeItem('admin_jwt');
+        navigate('/home', { replace: true });
+        return;
       }
+      const data = await res.json();
+      setOrders(data);
     } catch (err) {
       setMessage('Network error');
     }
@@ -61,28 +61,27 @@ function Dashboard() {
     setSelectedStatus(prev => ({ ...prev, [orderId]: status }));
   };
 
+  // Update order status (add JWT to header)
   const updateStatus = async (orderId) => {
     const status = selectedStatus[orderId];
     if (!status) return;
     setMessage('');
+    const jwt = sessionStorage.getItem('admin_jwt');
     try {
-      const secretToUse = sessionStorage.getItem('admin_secret');
       const res = await fetch(`${API_URL}/api/orders/${orderId}/status`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwt}`,
+        },
         body: JSON.stringify({ status }),
       });
-      const text = await res.text();
-      try {
-        const data = JSON.parse(text);
-        if (data.success) {
-          setMessage('Status updated!');
-          //fetchOrders(secretToUse);
-        } else {
-          setMessage(data.error || 'Failed to update status');
-        }
-      } catch {
-        setMessage('Server error.');
+      const data = await res.json();
+      if (data.success) {
+        setMessage('Status updated!');
+        fetchOrders(jwt);
+      } else {
+        setMessage(data.error || 'Failed to update status');
       }
     } catch (err) {
       setMessage('Error updating status');
@@ -95,17 +94,7 @@ function Dashboard() {
     <div className="container mt-5" style={{ maxWidth: 900 }}>
       <h2>Admin Dashboard</h2>
       <div className="mb-3">
-        <label>Admin Secret:</label>
-        <input
-          type="password"
-          className="form-control"
-          value={secret}
-          onChange={e => setSecret(e.target.value)}
-          placeholder="Enter admin secret"
-          autoFocus    
-          style={{ maxWidth: 300, display: 'inline-block', marginRight: 10 }}
-        />
-        <button className="btn btn-primary" onClick={() => fetchOrders()} disabled={loading}>
+        <button className="btn btn-primary" onClick={() => fetchOrders(sessionStorage.getItem('admin_jwt'))} disabled={loading}>
           {loading ? 'Loading...' : 'Fetch Orders'}
         </button>
       </div>
