@@ -1,7 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import TimePicker from 'react-time-picker';
+import 'react-time-picker/dist/TimePicker.css';
 import bg1 from './images/bg1.jpg';
 import fng4 from './images/fng4.png';
+
+const TIME_BLOCKS = [
+  { label: '7:00 AM - 11:00 AM', value: '07:00-11:00' },
+  { label: '11:00 AM - 3:00 PM', value: '11:00-15:00' },
+  { label: '3:00 PM - 7:00 PM', value: '15:00-19:00' },
+];
 
 function PickUp() {
   const [form, setForm] = useState({
@@ -9,10 +19,10 @@ function PickUp() {
     address: '',
     city: '',
     zip: '',
-    pickupDate: '',
-    pickupTime: '',
+    pickupDate: null, // Date object
+    pickupTime: '',   // "07:00-11:00" etc.
     loadAmount: 1,
-    dropoffTime: '',
+    dropoffTime: '',  // "07:00-11:00" etc.
   });
   const [loading, setLoading] = useState(false);
   const [showAuthAlert, setShowAuthAlert] = useState(false);
@@ -50,38 +60,25 @@ function PickUp() {
     setShowAuthAlert(false);
   };
 
-  // Generate time options in 30-minute intervals
-  const generateTimeOptions = () => {
-    const options = [];
-    for (let h = 0; h < 24; h++) {
-      for (let m = 0; m < 60; m += 30) {
-        const hour = h.toString().padStart(2, '0');
-        const min = m.toString().padStart(2, '0');
-        options.push(`${hour}:${min}`);
-      }
-    }
-    return options;
-  };
-
-  // Calculate minimum dropoff time (4 hours after pickup)
-  const getMinDropoffTime = () => {
-    if (!form.pickupTime) return '';
-    const [hours, minutes] = form.pickupTime.split(':').map(Number);
-    const date = new Date();
-    date.setHours(hours + 4, minutes, 0, 0);
-    return date.toTimeString().slice(0, 5);
-  };
-
-  // Only show dropoff options that are at least 4 hours after pickup
-  const getDropoffOptions = () => {
+  // Only allow dropoff blocks after pickup block
+  const getDropoffBlocks = () => {
     if (!form.pickupTime) return [];
-    const minDropoff = getMinDropoffTime();
-    return generateTimeOptions().filter(time => time >= minDropoff);
+    const pickupIndex = TIME_BLOCKS.findIndex(b => b.value === form.pickupTime);
+    return TIME_BLOCKS.slice(pickupIndex + 1);
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+    // Reset dropoffTime if pickupTime changes
+    if (name === 'pickupTime') {
+      setForm({ ...form, pickupTime: value, dropoffTime: '' });
+    } else {
+      setForm({ ...form, [name]: value });
+    }
+  };
+
+  const handleDateChange = (date) => {
+    setForm({ ...form, pickupDate: date });
   };
 
   const handleSubmit = async (e) => {
@@ -94,17 +91,16 @@ function PickUp() {
       let user_id = 2; // default to guest
       const token = localStorage.getItem('laundry_token');
       if (token) {
-        // If you store user_id in the token, parse it here.
-        // For example, if token is just the user_id:
         user_id = Number(token);
-
-        // If your token is a JWT or JSON, parse accordingly:
-        // const user = JSON.parse(atob(token.split('.')[1]));
-        // user_id = user.id;
       }
 
       // Concatenate address, city, and zip for the address field
       const fullAddress = `${form.address}, ${form.city}, ${form.zip}`;
+
+      // Convert pickupDate to YYYY-MM-DD string
+      const pickupDateStr = form.pickupDate
+        ? form.pickupDate.toISOString().slice(0, 10)
+        : '';
 
       const API_URL = process.env.REACT_APP_API_URL;
       const response = await fetch(`${API_URL}/api/pickups`, {
@@ -112,7 +108,13 @@ function PickUp() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ ...form, address: fullAddress, price, user_id })
+        body: JSON.stringify({
+          ...form,
+          pickupDate: pickupDateStr,
+          address: fullAddress,
+          price,
+          user_id
+        })
       });
       const data = await response.json();
       if (response.ok && data.success) {
@@ -121,7 +123,7 @@ function PickUp() {
         navigate('/payments', {
           state: {
             amount: price,
-            pickupInfo: { ...form, address: fullAddress, user_id }
+            pickupInfo: { ...form, pickupDate: pickupDateStr, address: fullAddress, user_id }
           }
         });
       } else {
@@ -197,9 +199,6 @@ function PickUp() {
             height: 100,
             objectFit: 'contain',
             marginBottom: 12,
-            // background: 'rgba(255,255,255,0.85)',
-            // borderRadius: 12,
-            // boxShadow: '0 2px 8px rgba(0,0,0,0.10)'
           }}
         />
       </div>
@@ -280,24 +279,26 @@ function PickUp() {
           </div>
         </div>
         <div className="mb-3">
-          <label htmlFor="pickupDate" className="form-label">Pick Up Date</label>
-          <input
-            type="date"
+          <label htmlFor="pickupDate" className="form-label" style={{  marginRight: 8 }}>Pick Up Date</label>
+          <DatePicker
+            selected={form.pickupDate}
+            onChange={handleDateChange}
             className="form-control"
             id="pickupDate"
             name="pickupDate"
-            value={form.pickupDate}
-            onChange={handleChange}
             required
+            dateFormat="yyyy-MM-dd"
+            minDate={new Date()}
+            placeholderText="Select a date"
             style={{
               background: '#cfe2ff',
               color: '#222',
-              border: '1px solid #86b7fe'
+              border: '1px solid #86b7fe',
             }}
           />
         </div>
         <div className="mb-3">
-          <label htmlFor="pickupTime" className="form-label">Pick Up Time</label>
+          <label htmlFor="pickupTime" className="form-label">Pick Up Time Block</label>
           <select
             className="form-select"
             id="pickupTime"
@@ -311,9 +312,9 @@ function PickUp() {
               border: '1px solid #86b7fe'
             }}
           >
-            <option value="">Select time</option>
-            {generateTimeOptions().map(time => (
-              <option key={time} value={time}>{time}</option>
+            <option value="">Select time block</option>
+            {TIME_BLOCKS.map(block => (
+              <option key={block.value} value={block.value}>{block.label}</option>
             ))}
           </select>
         </div>
@@ -337,7 +338,7 @@ function PickUp() {
           />
         </div>
         <div className="mb-3">
-          <label htmlFor="dropoffTime" className="form-label">Drop Off Time (at least 4 hours after pick up)</label>
+          <label htmlFor="dropoffTime" className="form-label">Drop Off Time Block (after pickup)</label>
           <select
             className="form-select"
             id="dropoffTime"
@@ -352,16 +353,16 @@ function PickUp() {
               border: '1px solid #86b7fe'
             }}
           >
-            <option value="">Select time</option>
+            <option value="">Select time block</option>
             {form.pickupTime &&
-              getDropoffOptions().map(time => (
-                <option key={time} value={time}>{time}</option>
+              getDropoffBlocks().map(block => (
+                <option key={block.value} value={block.value}>{block.label}</option>
               ))
             }
           </select>
           {form.pickupTime && (
             <div className="form-text">
-              Earliest drop off: {getMinDropoffTime()}
+              Must be after pickup block.
             </div>
           )}
         </div>

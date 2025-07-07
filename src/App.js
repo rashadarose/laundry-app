@@ -149,7 +149,7 @@ function App() {
       <div className="App">
         <header style={{ minHeight: '56px', padding: '0' }}>
           <nav className="navbar navbar-expand-lg navbar-light bg-light" style={{ minHeight: '56px', padding: '0' }}>
-            <div className="container-fluid" style={{ minHeight: '56px', paddingTop: 0, paddingBottom: 0 }}>
+            <div className="container" style={{ minHeight: '56px', paddingTop: 0, paddingBottom: 0, width: '40%' }}>
               <a className="navbar-brand d-flex align-items-center" href="/home" style={{ paddingTop: 0, paddingBottom: 0 }}>
                 <img
                   src={fngologo1}
@@ -168,7 +168,7 @@ function App() {
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span className="navbar-toggler-icon"></span>
               </button>
-              <div className="collapse navbar-collapse justify-content-end" id="navbarNav">
+              <div className="collapse navbar-collapse " id="navbarNav">
                 <ul className="navbar-nav">
                   <li className="nav-item">
                     <Link className="nav-link" to="/home" onClick={closeNavbar}>Home</Link>
@@ -176,8 +176,11 @@ function App() {
                   <li className="nav-item">
                     <Link className="nav-link" to="/pickup" onClick={closeNavbar}>Pick Up</Link>
                   </li>
-                  <li className="nav-item">
+                  {/* <li className="nav-item">
                     <Link className="nav-link" to="/signin" onClick={closeNavbar}>Sign in</Link>
+                  </li> */}
+                   <li>
+                    <Link to="/faq" className="nav-link"  onClick={closeNavbar}>FAQs</Link>
                   </li>
                   <li className="nav-item">
                     <Link className="nav-link" to="/contact" onClick={closeNavbar}>Contact Us</Link>
@@ -212,7 +215,7 @@ function App() {
                         </ul>
                       </div>
                     ) : (
-                      <Link className="nav-link p-0" to="/signin" onClick={closeNavbar} style={{ color: '#007bff' }}>
+                      <Link className="nav-link p-0" to="/signin" onClick={closeNavbar} style={{ color: '' }}>
                         Sign In
                       </Link>
                     )}

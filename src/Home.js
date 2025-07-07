@@ -43,7 +43,7 @@ function Home() {
                         objectFit: 'cover',
                         display: 'block',
                         margin: '0 auto',
-                        opacity: 0.55,
+                        opacity: 0.45,
                         borderRadius: 5,
                     }}
                 />
@@ -73,24 +73,31 @@ function Home() {
                     />
                     <h1 id="jumboTitle"
                         style={{
-                            color: '#222',
+                            color: '#fff',
                             fontSize: '3.2rem',
                             fontWeight: 700,
                             letterSpacing: 1,
                             margin: 0,
                         }}
                     >
-                        Fold N Go Laundry Service
+                        Less Laundry, More Living.
                     </h1>
+                    <p id="jumboSubtitle"
+                        style={{
+                            color: '#fff',
+                            fontSize: '1.4rem',
+                            fontWeight: 400,
+                            margin: '10px 0 20px 0',
+                        }}>Schedule your laundry pickup today and reclaim your time.</p>
                     <Link
                         to="/pickup"
                         style={{
                             display: 'inline-block',
                             color: '#fff',
-                            background: 'rgba(0,0,0,0.85)',
-                            padding: '14px 38px',
+                            background: '#0E3052',
+                            padding: '14px 28px',
                             borderRadius: 10,
-                            fontSize: '1.8rem',
+                            fontSize: '0.8rem',
                             fontWeight: 400,
                             letterSpacing: 0.5,
                             margin: '20px 0 0 0',
@@ -98,7 +105,7 @@ function Home() {
                             transition: 'background 0.2s',
                         }}
                     >
-                        Fast Laundry Pick Up and Delivery
+                        Pick Up and Delivery
                     </Link>
                 </div>
             </div>
