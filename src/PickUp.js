@@ -19,10 +19,11 @@ function PickUp() {
     address: '',
     city: '',
     zip: '',
-    pickupDate: null, // Date object
-    pickupTime: '',   // "07:00-11:00" etc.
-    loadAmount: 1,
-    dropoffTime: '',  // "07:00-11:00" etc.
+    pickup_time: '',
+    dropoff_time: '',
+    pickup_date: null,
+    load_amount: 1,
+    notes: '', // <-- Add notes to state
   });
   const [loading, setLoading] = useState(false);
   const [showAuthAlert, setShowAuthAlert] = useState(false);
@@ -62,30 +63,33 @@ function PickUp() {
 
   // Only allow dropoff blocks after pickup block
   const getDropoffBlocks = () => {
-    if (!form.pickupTime) return [];
-    const pickupIndex = TIME_BLOCKS.findIndex(b => b.value === form.pickupTime);
-    return TIME_BLOCKS.slice(pickupIndex + 1);
+    if (!form.pickup_time) return [];
+    const pickupIndex = TIME_BLOCKS.findIndex(b => b.value === form.pickup_time);
+    // Only show blocks AFTER the selected pickup block
+    return pickupIndex >= 0 ? TIME_BLOCKS.slice(pickupIndex + 1) : [];
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // Reset dropoffTime if pickupTime changes
-    if (name === 'pickupTime') {
-      setForm({ ...form, pickupTime: value, dropoffTime: '' });
+    // Reset dropoff_time if pickup_time changes
+    if (name === 'pickup_time') {
+      setForm({ ...form, pickup_time: value, dropoff_time: '' });
+    } else if (name === 'dropoff_time') {
+      setForm({ ...form, dropoff_time: value });
     } else {
       setForm({ ...form, [name]: value });
     }
   };
 
   const handleDateChange = (date) => {
-    setForm({ ...form, pickupDate: date });
+    setForm({ ...form, pickup_date: date });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const price = form.loadAmount * 20; // Calculate price
+      const price = form.load_amount * 20; // Calculate price
 
       // Use user_id from token if signed in, otherwise use guest id = 2
       let user_id = 2; // default to guest
@@ -97,9 +101,9 @@ function PickUp() {
       // Concatenate address, city, and zip for the address field
       const fullAddress = `${form.address}, ${form.city}, ${form.zip}`;
 
-      // Convert pickupDate to YYYY-MM-DD string
-      const pickupDateStr = form.pickupDate
-        ? form.pickupDate.toISOString().slice(0, 10)
+      // Convert pickup_date to YYYY-MM-DD string
+      const pickupDateStr = form.pickup_date
+        ? form.pickup_date.toISOString().slice(0, 10)
         : '';
 
       const API_URL = process.env.REACT_APP_API_URL;
@@ -110,20 +114,28 @@ function PickUp() {
         },
         body: JSON.stringify({
           ...form,
-          pickupDate: pickupDateStr,
+          pickup_date: pickupDateStr,
           address: fullAddress,
           price,
-          user_id
+          user_id,
+          notes: form.notes // <-- Send notes to API
         })
       });
       const data = await response.json();
       if (response.ok && data.success) {
         alert(data.message || 'Pickup order created successfully!');
-        // Redirect to payment page with price as state
+        // Redirect to payment page with price as state, include confirm_number from API response
         navigate('/payments', {
           state: {
             amount: price,
-            pickupInfo: { ...form, pickupDate: pickupDateStr, address: fullAddress, user_id }
+            pickupInfo: {
+              ...form,
+              pickup_date: pickupDateStr,
+              address: fullAddress,
+              user_id,
+              confirm_number: data.confirm_number || '',
+              notes: form.notes // <-- Pass notes to payment page
+            }
           }
         });
       } else {
@@ -279,13 +291,13 @@ function PickUp() {
           </div>
         </div>
         <div className="mb-3">
-          <label htmlFor="pickupDate" className="form-label" style={{  marginRight: 8 }}>Pick Up Date</label>
+          <label htmlFor="pickupDate" className="form-label" style={{ marginRight: 8 }}>Pick Up Date</label>
           <DatePicker
-            selected={form.pickupDate}
-            onChange={handleDateChange}
+            selected={form.pickup_date} // <-- use pickup_date
+            onChange={date => setForm({ ...form, pickup_date: date })} // <-- update pickup_date
             className="form-control"
             id="pickupDate"
-            name="pickupDate"
+            name="pickup_date"
             required
             dateFormat="yyyy-MM-dd"
             minDate={new Date()}
@@ -302,8 +314,8 @@ function PickUp() {
           <select
             className="form-select"
             id="pickupTime"
-            name="pickupTime"
-            value={form.pickupTime}
+            name="pickup_time"
+            value={form.pickup_time}
             onChange={handleChange}
             required
             style={{
@@ -342,11 +354,11 @@ function PickUp() {
           <select
             className="form-select"
             id="dropoffTime"
-            name="dropoffTime"
-            value={form.dropoffTime}
+            name="dropoff_time"
+            value={form.dropoff_time}
             onChange={handleChange}
             required
-            disabled={!form.pickupTime}
+            disabled={!form.pickup_time || getDropoffBlocks().length === 0}
             style={{
               background: '#cfe2ff',
               color: '#222',
@@ -354,17 +366,37 @@ function PickUp() {
             }}
           >
             <option value="">Select time block</option>
-            {form.pickupTime &&
-              getDropoffBlocks().map(block => (
-                <option key={block.value} value={block.value}>{block.label}</option>
-              ))
-            }
+            {getDropoffBlocks().map(block => (
+              <option key={block.value} value={block.value}>{block.label}</option>
+            ))}
           </select>
-          {form.pickupTime && (
+          {form.pickup_time && getDropoffBlocks().length === 0 && (
+            <div className="form-text text-danger">
+              No available drop off blocks after selected pickup time.
+            </div>
+          )}
+          {form.pickup_time && getDropoffBlocks().length > 0 && (
             <div className="form-text">
               Must be after pickup block.
             </div>
           )}
+        </div>
+        <div className="mb-3">
+          <label htmlFor="notes" className="form-label">Order Notes (optional)</label>
+          <textarea
+            className="form-control"
+            id="notes"
+            name="notes"
+            value={form.notes}
+            onChange={handleChange}
+            placeholder="Add any special instructions or notes for your order"
+            rows={3}
+            style={{
+              background: '#e9ecef',
+              color: '#222',
+              border: '1px solid #86b7fe'
+            }}
+          />
         </div>
         {/* Price element */}
         <div className="mb-3">
@@ -372,7 +404,11 @@ function PickUp() {
           <input
             type="text"
             className="form-control"
-            value={`$${(form.loadAmount * 20).toFixed(2)}`}
+            value={
+              Number.isFinite(Number(form.load_amount))
+                ? `$${(Number(form.load_amount) * 20).toFixed(2)}`
+                : '$0.00'
+            }
             readOnly
             style={{
               background: '#e9ecef',

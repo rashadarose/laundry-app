@@ -95,9 +95,9 @@ function PaymentForm() {
                         <h5 className="card-title">Pickup Details</h5>
                         <p><strong>Name:</strong> {pickupInfo.name}</p>
                         <p><strong>Address:</strong> {pickupInfo.address}</p>
-                        <p><strong>Pickup Date:</strong> {pickupInfo.pickupDate}</p>
-                        <p><strong>Pickup Time:</strong> {pickupInfo.pickupTime}</p>
-                        <p><strong>Dropoff Time:</strong> {pickupInfo.dropoffTime}</p>
+                        <p><strong>Pickup Date:</strong> {pickupInfo.pickup_date}</p>
+                        <p><strong>Pickup Time:</strong> {pickupInfo.pickup_time}</p>
+                        <p><strong>Dropoff Time:</strong> {pickupInfo.dropoff_time}</p>
                         <p><strong>Load Amount:</strong> {pickupInfo.loadAmount}</p>
                         <p><strong>Base Price:</strong> ${baseAmount.toFixed(2)}</p>
                         <p><strong>Processing Fee:</strong> ${processingFee.toFixed(2)}</p>
