@@ -156,20 +156,32 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <header style={{ minHeight: '56px', padding: '0' }}>
-          <nav className="navbar navbar-expand-lg navbar-light bg-light" style={{ minHeight: '56px', padding: '0' }}>
+        <header style={{ 
+          minHeight: '56px', 
+          padding: '0',
+          background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 1020,
+          transition: 'all 0.3s ease'
+        }}>
+          <nav className="navbar navbar-expand-lg navbar-dark" style={{ 
+            minHeight: '56px', 
+            padding: '0',
+            background: 'transparent'
+          }}>
             <div className="container-fluid" style={{ 
               minHeight: '56px', 
               paddingTop: 0, 
               paddingBottom: 0, 
-              paddingLeft: '20px', // Add left padding for logo
-              paddingRight: '20px', // Add right padding for balance
-              justifyContent: 'space-between' // Change from 'end' to 'space-between'
+              paddingLeft: '20px',
+              paddingRight: '20px',
+              justifyContent: 'space-between'
             }}>
               <a className="navbar-brand d-flex align-items-center" href="/home" style={{ 
                 paddingTop: 0, 
                 paddingBottom: 0,
-                marginRight: 'auto' // Push logo to the left
+                marginRight: 'auto'
               }}>
                 <img
                   src={fngologo1}
@@ -179,36 +191,38 @@ function App() {
                     width: 'auto',
                     objectFit: 'contain',
                     marginTop: '-18px',
-                    marginBottom: '-18px'
+                    marginBottom: '-18px',
+                    filter: 'brightness(1.2) drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
                   }}
                   className="d-inline-block align-top me-2"
                 />
               </a>
               <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"
+                style={{ borderColor: 'rgba(255,255,255,0.3)' }}>
                 <span className="navbar-toggler-icon"></span>
               </button>
               <div className="collapse navbar-collapse" id="navbarNav" style={{ justifyContent: 'flex-end' }}>
                 <ul className="navbar-nav">
                   <li className="nav-item">
-                    <Link className="nav-link" to="/home" onClick={closeNavbar}>Home</Link>
+                    <Link className="nav-link text-white" to="/home" onClick={closeNavbar} style={{ fontWeight: '500' }}>Home</Link>
                   </li>
                   <li className="nav-item">
-                    <Link className="nav-link" to="/pickup" onClick={closeNavbar}>Pick Up</Link>
+                    <Link className="nav-link text-white" to="/pickup" onClick={closeNavbar} style={{ fontWeight: '500' }}>Pick Up</Link>
                   </li>
                    <li>
-                    <Link to="/faq" className="nav-link"  onClick={closeNavbar}>FAQs</Link>
+                    <Link to="/faq" className="nav-link text-white" onClick={closeNavbar} style={{ fontWeight: '500' }}>FAQs</Link>
                   </li>
                   <li className="nav-item">
-                    <Link className="nav-link" to="/contact" onClick={closeNavbar}>Contact Us</Link>
+                    <Link className="nav-link text-white" to="/contact" onClick={closeNavbar} style={{ fontWeight: '500' }}>Contact Us</Link>
                   </li>
                   {/* User Icon and Name/Sign In */}
                   <li className="nav-item d-flex align-items-center ms-2 position-relative">
-                    <FaUserCircle size={22} style={{ marginRight: 6, color: '#0E3052' }} />
+                    <FaUserCircle size={22} style={{ marginRight: 6, color: userName ? '#fbbf24' : '#3b82f6' }} />
                     {userName ? (
                       <div className="dropdown">
                         <span
-                          className="dropdown-toggle"
+                          className="dropdown-toggle text-white"
                           id="userDropdown"
                           data-bs-toggle="dropdown"
                           aria-expanded="false"
@@ -232,7 +246,7 @@ function App() {
                         </ul>
                       </div>
                     ) : (
-                      <Link className="nav-link p-0" to="/signin" onClick={closeNavbar} style={{ color: '' }}>
+                      <Link className="nav-link p-0 text-white" to="/signin" onClick={closeNavbar} style={{ fontWeight: '500' }}>
                         Sign In
                       </Link>
                     )}
@@ -242,6 +256,7 @@ function App() {
             </div>
           </nav>
         </header>
+        
         <main>
           <Routes>
             <Route path="/home" element={<Home />} />
