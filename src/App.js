@@ -144,13 +144,33 @@ function App() {
     }
   }
 
+  // Add loading spinner component
+  const LoadingSpinner = () => (
+    <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
+      <div className="spinner-border text-primary" role="status">
+        <span className="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  );
+
   return (
     <Router>
       <div className="App">
         <header style={{ minHeight: '56px', padding: '0' }}>
           <nav className="navbar navbar-expand-lg navbar-light bg-light" style={{ minHeight: '56px', padding: '0' }}>
-            <div className="container" style={{ minHeight: '56px', paddingTop: 0, paddingBottom: 0, width: '40%' }}>
-              <a className="navbar-brand d-flex align-items-center" href="/home" style={{ paddingTop: 0, paddingBottom: 0 }}>
+            <div className="container-fluid" style={{ 
+              minHeight: '56px', 
+              paddingTop: 0, 
+              paddingBottom: 0, 
+              paddingLeft: '20px', // Add left padding for logo
+              paddingRight: '20px', // Add right padding for balance
+              justifyContent: 'space-between' // Change from 'end' to 'space-between'
+            }}>
+              <a className="navbar-brand d-flex align-items-center" href="/home" style={{ 
+                paddingTop: 0, 
+                paddingBottom: 0,
+                marginRight: 'auto' // Push logo to the left
+              }}>
                 <img
                   src={fngologo1}
                   alt="Logo"
@@ -168,7 +188,7 @@ function App() {
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span className="navbar-toggler-icon"></span>
               </button>
-              <div className="collapse navbar-collapse " id="navbarNav">
+              <div className="collapse navbar-collapse" id="navbarNav" style={{ justifyContent: 'flex-end' }}>
                 <ul className="navbar-nav">
                   <li className="nav-item">
                     <Link className="nav-link" to="/home" onClick={closeNavbar}>Home</Link>
@@ -176,9 +196,6 @@ function App() {
                   <li className="nav-item">
                     <Link className="nav-link" to="/pickup" onClick={closeNavbar}>Pick Up</Link>
                   </li>
-                  {/* <li className="nav-item">
-                    <Link className="nav-link" to="/signin" onClick={closeNavbar}>Sign in</Link>
-                  </li> */}
                    <li>
                     <Link to="/faq" className="nav-link"  onClick={closeNavbar}>FAQs</Link>
                   </li>
@@ -220,21 +237,6 @@ function App() {
                       </Link>
                     )}
                   </li>
-                  {/* Admin Link: Only show if NOT admin */}
-                  {/* {!isAdmin && (
-                    <li className="nav-item">
-                      <Link
-                        to="/dashboard"
-                        className="nav-link"
-                        onClick={e => {
-                          closeNavbar();
-                          handleDashboardClick(e);
-                        }}
-                      >
-                        Admin
-                      </Link>
-                    </li>
-                  )} */}
                 </ul>
               </div>
             </div>
@@ -258,7 +260,9 @@ function App() {
             <Route path="/" element={<Home />} />
           </Routes>
         </main>
-        <footer className="bg-dark text-white mt-auto py-5">
+        <footer className="text-white mt-auto py-5" style={{
+          background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%)'
+        }}>
           <div className="container">
             <div className="row text-center text-md-start">
               {/* Logo and About */}

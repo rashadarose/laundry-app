@@ -215,9 +215,11 @@ function PickUp() {
         />
       </div>
       <h2 className="mb-4 text-center" style={{ position: 'relative', zIndex: 1 }}>Pick Up Order</h2>
+      {/* Order Progress Tracker */}
+      <OrderProgress currentStep={1} />
       <form onSubmit={handleSubmit} style={{ position: 'relative', zIndex: 1 }}>
-        <div className="mb-3">
-          <label htmlFor="name" className="form-label">Name</label>
+        {/* Modern form inputs with floating labels */}
+        <div className="form-floating mb-3">
           <input
             type="text"
             className="form-control"
@@ -225,14 +227,19 @@ function PickUp() {
             name="name"
             value={form.name}
             onChange={handleChange}
-            required
-            autoFocus
+            placeholder="Full Name"
             style={{
-              background: '#cfe2ff',
-              color: '#222',
-              border: '1px solid #86b7fe'
+              borderRadius: '12px',
+              border: '2px solid #e2e8f0',
+              fontSize: '1rem',
+              padding: '12px 16px',
+              transition: 'all 0.3s ease'
             }}
+            onFocus={e => e.target.style.borderColor = '#3b82f6'}
+            onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+            required
           />
+          <label htmlFor="name">Full Name</label>
         </div>
         <div className="mb-3">
           <label htmlFor="address" className="form-label">Address</label>
@@ -429,5 +436,41 @@ function PickUp() {
     </div>
   );
 }
+
+// Add to PickUp.js - Visual order process
+const OrderProgress = ({ currentStep = 1 }) => {
+  const steps = [
+    { icon: 'calendar-plus', label: 'Schedule' },
+    { icon: 'credit-card', label: 'Payment' },
+    { icon: 'truck', label: 'Pickup' },
+    { icon: 'check-circle', label: 'Complete' }
+  ];
+
+  return (
+    <div className="progress-tracker mb-4">
+      <div className="d-flex justify-content-between align-items-center">
+        {steps.map((step, index) => (
+          <div key={index} className="text-center">
+            <div className={`step-circle ${index + 1 <= currentStep ? 'active' : ''}`} style={{
+              width: '50px', height: '50px',
+              borderRadius: '50%',
+              background: index + 1 <= currentStep ? '#10b981' : '#e2e8f0',
+              color: index + 1 <= currentStep ? 'white' : '#64748b',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 8px'
+            }}>
+              <i className={`fas fa-${step.icon}`}></i>
+            </div>
+            <small className={index + 1 <= currentStep ? 'text-success fw-bold' : 'text-muted'}>
+              {step.label}
+            </small>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export default PickUp;
