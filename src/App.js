@@ -3,7 +3,7 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import SignIn from './pages/SignIn';
+import SignIn from './pages/SignIn'; // Keep this one - it's in the pages folder
 import SignUp from './SignUp'; 
 import PickUp from './PickUp'; 
 import Home from './Home';
@@ -19,25 +19,122 @@ import Dashboard from './Dashboard';
 import Terms from './Terms';
 import React, { useEffect, useState } from 'react';
 import { FaUserCircle } from 'react-icons/fa';
+import Pricing from './Pricing';
+import Weight from './Weight';
+import Support from './Support';
+import Profile from './Profile';
+import AboutUs from './AboutUs'; // Add AboutUs import
 
 const HOUSTON_ZIPCODES = [
   '77002','77003','77004','77005','77006','77007','77008','77009','77010','77011','77012','77013','77014','77015','77016','77017','77018','77019','77020','77021','77022','77023','77024','77025','77026','77027','77028','77029','77030','77031','77032','77033','77034','77035','77036','77037','77038','77039','77040','77041','77042','77043','77044','77045','77046','77047','77048','77049','77050','77051','77053','77054','77055','77056','77057','77058','77059','77060','77061','77062','77063','77064','77065','77066','77067','77068','77069','77070','77071','77072','77073','77074','77075','77076','77077','77078','77079','77080','77081','77082','77083','77084','77085','77086','77087','77088','77089','77090','77091','77092','77093','77094','77095','77096','77098','77099','77204'
 ];
 
 function App() {
+  // Updated state for session-based auth
+  const [userName, setUserName] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
+  
+  // ...existing state (zip modal, admin modal, etc.)...
   const [showZipModal, setShowZipModal] = useState(false);
   const [zipInput, setZipInput] = useState('');
   const [zipError, setZipError] = useState('');
-
-  // Admin modal state
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [adminUsername, setAdminUsername] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [adminError, setAdminError] = useState('');
   const [navigateToDashboard, setNavigateToDashboard] = useState(false);
-  const [userName, setUserName] = useState('');
-  const [isAdmin, setIsAdmin] = useState(false);
 
+  // Check session status on mount and periodically
+  useEffect(() => {
+    checkSession();
+    // Check session every 30 seconds to keep it fresh
+    const interval = setInterval(checkSession, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const checkSession = async () => {
+    console.log('🔍 Checking session...');
+    try {
+      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
+      const response = await fetch(`${API_URL}/api/auth/session`, {
+        method: 'GET',
+        credentials: 'include', // Important: include cookies for sessions
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log('📡 Session response status:', response.status);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Session data received:', data);
+        
+        if (data.success && data.user) {
+          console.log('🎉 Setting user state:', data.user.name);
+          setUserName(data.user.name || 'User');
+          setUserEmail(data.user.email || '');
+          setIsLoggedIn(true);
+          
+          // Clear any old localStorage tokens
+          localStorage.removeItem('laundry_token');
+        } else {
+          console.log('❌ No valid session data');
+          // No active session
+          setUserName('');
+          setUserEmail('');
+          setIsLoggedIn(false);
+        }
+      } else {
+        console.log('❌ Session check failed with status:', response.status);
+        // No active session
+        setUserName('');
+        setUserEmail('');
+        setIsLoggedIn(false);
+      }
+    } catch (error) {
+      console.error('💥 Session check error:', error);
+      setUserName('');
+      setUserEmail('');
+      setIsLoggedIn(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
+      await fetch(`${API_URL}/api/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      // Clear local state
+      setUserName('');
+      setUserEmail('');
+      setIsLoggedIn(false);
+      
+      // Clear any old localStorage
+      localStorage.removeItem('laundry_token');
+      
+      // Redirect to home
+      window.location.href = '/home';
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Force clear anyway
+      setUserName('');
+      setUserEmail('');
+      setIsLoggedIn(false);
+      localStorage.removeItem('laundry_token');
+      window.location.href = '/home';
+    }
+  };
+
+  // ...existing useEffect for scroll, zip modal, admin JWT, etc...
   useEffect(() => {
     const handleScroll = () => {
       const header = document.querySelector('header');
@@ -52,13 +149,19 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // Only show modal if zip code not already stored
     const storedZip = localStorage.getItem('houston_zip');
     if (!storedZip) setShowZipModal(true);
   }, []);
 
+  // Remove the old localStorage user check effect - we're using sessions now
+
+  // ...existing functions for zip modal, admin modal, etc...
   const handleZipSubmit = (e) => {
     e.preventDefault();
+    const HOUSTON_ZIPCODES = [
+      '77002','77003','77004','77005','77006','77007','77008','77009','77010','77011','77012','77013','77014','77015','77016','77017','77018','77019','77020','77021','77022','77023','77024','77025','77026','77027','77028','77029','77030','77031','77032','77033','77034','77035','77036','77037','77038','77039','77040','77041','77042','77043','77044','77045','77046','77047','77048','77049','77050','77051','77053','77054','77055','77056','77057','77058','77059','77060','77061','77062','77063','77064','77065','77066','77067','77068','77069','77070','77071','77072','77073','77074','77075','77076','77077','77078','77079','77080','77081','77082','77083','77084','77085','77086','77087','77088','77089','77090','77091','77092','77093','77094','77095','77096','77098','77099','77204'
+    ];
+    
     if (HOUSTON_ZIPCODES.includes(zipInput.trim())) {
       localStorage.setItem('houston_zip', zipInput.trim());
       setShowZipModal(false);
@@ -68,7 +171,6 @@ function App() {
     }
   };
 
-  // Handle dashboard link click
   const handleDashboardClick = (e) => {
     e.preventDefault();
     setShowAdminModal(true);
@@ -77,7 +179,6 @@ function App() {
     setAdminError('');
   };
 
-  // Handle admin JWT login
   const handleAdminSubmit = async (e) => {
     e.preventDefault();
     if (!adminUsername || !adminPassword) {
@@ -85,7 +186,7 @@ function App() {
       return;
     }
     try {
-      const API_URL = process.env.REACT_APP_API_URL || 'https://localhost:3002';
+      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
       const res = await fetch(`${API_URL}/api/admin/signin`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -96,45 +197,26 @@ function App() {
         setAdminError(data.error || 'Incorrect admin credentials.');
         return;
       }
-      // Store JWT token in sessionStorage
       sessionStorage.setItem('admin_jwt', data.token);
       setShowAdminModal(false);
-      setIsAdmin(true); // Set admin state
+      setIsAdmin(true);
       setNavigateToDashboard(true);
     } catch {
       setAdminError('Network error. Try again.');
     }
   };
 
-  // Check admin JWT on mount (persist admin session)
   useEffect(() => {
     const jwt = sessionStorage.getItem('admin_jwt');
     setIsAdmin(!!jwt);
   }, []);
 
-  // Navigate to dashboard after modal closes and token is set
   useEffect(() => {
     if (navigateToDashboard) {
       setNavigateToDashboard(false);
       window.location.href = '/dashboard';
     }
   }, [navigateToDashboard]);
-
-  // Check if user is signed in and get their name
-  useEffect(() => {
-    const userId = localStorage.getItem('laundry_token');
-    if (userId) {
-      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
-      fetch(`${API_URL}/api/users/${userId}`)
-        .then(res => res.json())
-        .then(user => {
-          setUserName(user.name || '');
-        })
-        .catch(() => setUserName(''));
-    } else {
-      setUserName('');
-    }
-  }, []);
 
   function closeNavbar() {
     const navbarToggler = document.querySelector('.navbar-toggler');
@@ -143,15 +225,6 @@ function App() {
       navbarToggler.click();
     }
   }
-
-  // Add loading spinner component
-  const LoadingSpinner = () => (
-    <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
-      <div className="spinner-border text-primary" role="status">
-        <span className="visually-hidden">Loading...</span>
-      </div>
-    </div>
-  );
 
   return (
     <Router>
@@ -210,16 +283,22 @@ function App() {
                   <li className="nav-item">
                     <Link className="nav-link text-white" to="/pickup" onClick={closeNavbar} style={{ fontWeight: '500' }}>Pick Up</Link>
                   </li>
-                   <li>
+                  <li className="nav-item">
+                    <Link className="nav-link text-white" to="/pricing" onClick={closeNavbar} style={{ fontWeight: '500' }}>Pricing</Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link className="nav-link text-white" to="/weight" onClick={closeNavbar} style={{ fontWeight: '500' }}>Guide</Link>
+                  </li>
+                  <li>
                     <Link to="/faq" className="nav-link text-white" onClick={closeNavbar} style={{ fontWeight: '500' }}>FAQs</Link>
                   </li>
                   <li className="nav-item">
                     <Link className="nav-link text-white" to="/contact" onClick={closeNavbar} style={{ fontWeight: '500' }}>Contact Us</Link>
                   </li>
-                  {/* User Icon and Name/Sign In */}
+                  {/* Updated User Icon and Name/Sign In */}
                   <li className="nav-item d-flex align-items-center ms-2 position-relative">
-                    <FaUserCircle size={22} style={{ marginRight: 6, color: userName ? '#fbbf24' : '#3b82f6' }} />
-                    {userName ? (
+                    <FaUserCircle size={22} style={{ marginRight: 6, color: isLoggedIn ? '#ffffffff' : '#3b82f6' }} />
+                    {isLoggedIn && userName ? (
                       <div className="dropdown">
                         <span
                           className="dropdown-toggle text-white"
@@ -228,18 +307,28 @@ function App() {
                           aria-expanded="false"
                           style={{ fontWeight: 500, cursor: 'pointer' }}
                         >
-                          {userName}
+                          Hello, {userName}
                         </span>
                         <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                           <li>
+                            <div className="dropdown-item-text small">
+                              <strong>{userName}</strong><br />
+                              <span className="text-muted">{userEmail}</span>
+                            </div>
+                          </li>
+                          <li><hr className="dropdown-divider" /></li>
+                          <li>
+                            <Link to="/profile" className="dropdown-item" onClick={closeNavbar}>
+                              <i className="fas fa-user me-2"></i>
+                              My Profile
+                            </Link>
+                          </li>
+                          <li>
                             <button
                               className="dropdown-item"
-                              onClick={() => {
-                                localStorage.removeItem('laundry_token');
-                                setUserName('');
-                                window.location.href = '/signin';
-                              }}
+                              onClick={handleLogout}
                             >
+                              <i className="fas fa-sign-out-alt me-2"></i>
                               Log Out
                             </button>
                           </li>
@@ -262,6 +351,8 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/pickup" element={<PickUp />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/weight" element={<Weight />} />
             <Route path="/services" element={<Services />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
@@ -272,16 +363,20 @@ function App() {
             <Route path="/policy" element={<Policy />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/terms-of-service" element={<Terms />} />
+            <Route path="/support" element={<Support />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/about" element={<AboutUs />} /> {/* Add AboutUs route */}
             <Route path="/" element={<Home />} />
           </Routes>
         </main>
+        
         <footer className="text-white mt-auto py-5" style={{
           background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%)'
         }}>
           <div className="container">
             <div className="row text-center text-md-start">
               {/* Logo and About */}
-              <div className="col-md-2 mb-4 mb-md-0 d-flex flex-column align-items-center align-items-md-start">
+              <div className="col-md-3 mb-4 mb-md-0 d-flex flex-column align-items-center align-items-md-start">
                 <img
                   src={fngologo1}
                   alt="Logo"
@@ -297,7 +392,7 @@ function App() {
                 <p className="small">Your trusted laundry partner in Houston, TX. Fast, friendly, and always fresh!</p>
               </div>
              
-              <div className="col-md-2 mb-4 mb-md-0">
+              <div className="col-md-3 mb-4 mb-md-0">
                 <h6 className="text-uppercase fw-bold mb-3">Services</h6>
                 <ul className="list-unstyled">
                   <li>
@@ -324,41 +419,19 @@ function App() {
                   </li>
                 </ul>
               </div>
+              
               {/* Company */}
-              <div className="col-md-2 mb-4 mb-md-0">
-                <h6 className="text-uppercase fw-bold mb-3">Company</h6>
+              <div className="col-md-3">
+                <h6 className="fw-bold mb-3">COMPANY</h6>
                 <ul className="list-unstyled">
-                  <li>
-                    <button type="button" className="text-white-50 text-decoration-none btn btn-link p-0" style={{ textAlign: 'left' }}>
-                      About Us
-                    </button>
-                  </li>
-                  <li>
-                  <Link to = "/comingsoon" onClick={closeNavbar} >
-                    <button type="button" className="text-white-50 text-decoration-none btn btn-link p-0" style={{ textAlign: 'left' }}>
-                      Careers
-                    </button>
-                    </Link>
-                  </li>
-                
-                  
-                  <li>
-                   <Link to = "/contact" onClick={closeNavbar} >
-                    <button type="button" className="text-white-50 text-decoration-none btn btn-link p-0" style={{ textAlign: 'left' }}>
-                      Contact
-                    </button>
-                    </Link>
-                  </li>
-                    <li>
-                  <Link to = "/comingsoon" onClick={closeNavbar} >
-                    <button type="button" className="text-white-50 text-decoration-none btn btn-link p-0" style={{ textAlign: 'left' }}>
-                      Blog
-                    </button>
-                    </Link>
-                  </li>
+                  <li><Link to="/weight" className="text-white-50 text-decoration-none" onClick={closeNavbar}>Weight Guide</Link></li>
+                  <li><Link to="/about" className="text-white-50 text-decoration-none" onClick={closeNavbar}>About Us</Link></li> {/* Updated About Us link */}
+                  <li><Link to="/comingsoon" className="text-white-50 text-decoration-none" onClick={closeNavbar}>Careers</Link></li>
+                  <li><Link to="/comingsoon" className="text-white-50 text-decoration-none" onClick={closeNavbar}>Press</Link></li>
                 </ul>
               </div>
-             { /* Legal & Help */}
+              
+              {/* Legal & Help */}
               <div className="col-md-3 mb-4 mb-md-0">
                 <h6 className="text-uppercase fw-bold mb-3">Legal &amp; Help</h6>
                 <ul className="list-unstyled">
@@ -374,7 +447,9 @@ function App() {
                     <Link to="/faq" className="text-white-50 text-decoration-none"  onClick={closeNavbar}>FAQs</Link>
                   </li>
                   <li>
-                    <a href="/support" className="text-white-50 text-decoration-none">Support</a>
+                    <Link to="/support" className="text-white-50 text-decoration-none" onClick={closeNavbar}>
+                      Support
+                    </Link>
                   </li>
                   <li>
                     <Link
@@ -390,10 +465,13 @@ function App() {
                   </li>
                 </ul>
               </div>
-              {/* Social Media */}
-              <div className="col-md-3">
-                <h6 className="text-uppercase fw-bold mb-3">Follow Us</h6>
-                <div className="d-flex gap-3 justify-content-center justify-content-md-start">
+            </div>
+            
+            {/* Social Media - separate row */}
+            <div className="row mt-4">
+              <div className="col-12">
+                <h6 className="text-uppercase fw-bold mb-3 text-center">Follow Us</h6>
+                <div className="d-flex gap-3 justify-content-center">
                   <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-white fs-4">
                     <i className="fab fa-facebook-f"></i>
                   </a>
@@ -409,6 +487,7 @@ function App() {
                 </div>
               </div>
             </div>
+            
             <hr className="my-4 border-secondary" />
             <div className="text-center small">
               &copy; {new Date().getFullYear()} Vibi Media LLC. All rights reserved. &nbsp;|&nbsp;

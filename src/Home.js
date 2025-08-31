@@ -78,14 +78,15 @@ function Home() {
         <div className="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
           <Link 
             to="/pickup" 
-            className="btn btn-lg px-4 py-3"
+            className="btn btn-outline-light btn-lg px-4 py-3"
             style={{
-              background: '#fbbf24', // Gold from logo
-              border: 'none',
-              color: '#1e3a8a', // Dark blue
+              //background: '#fbbf24', // Gold from logo
+              //border: 'none',
+              borderWidth: '2px',
+             // color: '#1e3a8a', // Dark blue
               fontWeight: '600',
               borderRadius: '12px',
-              boxShadow: '0 4px 15px rgba(251, 191, 36, 0.3)',
+              //boxShadow: '0 4px 15px rgba(251, 191, 36, 0.3)',
               transition: 'all 0.3s ease'
             }}
             onMouseEnter={e => {
@@ -404,7 +405,7 @@ function Home() {
                 <div className="pricing-section mt-5 mb-5">
                     <h3 className="text-center mb-5" style={{ fontSize: '2.4rem', color: '#1e3a8a' }}>Choose Your Plan</h3>
                     <div className="row justify-content-center">
-                        {/* Basic Tier */}
+                        {/* Self-Wash Tier */}
                         <div className="col-lg-4 col-md-6 mb-4">
                             <div className="card h-100 border-0 shadow-sm" style={{ 
                                 transition: 'all 0.3s ease',
@@ -419,12 +420,12 @@ function Home() {
                                 e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
                             }}>
                                 <div className="card-body text-center p-4">
-                                    <h4 className="mb-3" style={{ color: '#1e3a8a' }}>Basic</h4>
+                                    <h4 className="mb-3" style={{ color: '#1e3a8a' }}>Self-Wash</h4>
                                     <div className="mb-3">
-                                        <span className="h1 fw-bold" style={{ color: '#1e3a8a' }}>$20</span>
-                                        <span className="h6">/load</span>
+                                        <span className="h1 fw-bold" style={{ color: '#1e3a8a' }}>$18</span>
+                                        <span className="h6">/10 lb bag</span>
                                     </div>
-                                    <p className="mb-4" style={{ color: '#64748b' }}>Perfect for individuals & small households</p>
+                                    <p className="mb-4" style={{ color: '#64748b' }}>We wash, dry, and fold your laundry ourselves</p>
                                     <ul className="list-unstyled mb-4" style={{ fontSize: '0.95rem', color: '#64748b' }}>
                                         <li className="mb-2">✓ Wash & Fold</li>
                                         <li className="mb-2">✓ Standard Detergents</li>
@@ -445,7 +446,7 @@ function Home() {
                             </div>
                         </div>
 
-                        {/* Premium Tier */}
+                        {/* Next-Day Outsourced Tier */}
                         <div className="col-lg-4 col-md-6 mb-4">
                             <div className="card h-100 border-0 shadow-lg position-relative" style={{ 
                                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -472,18 +473,18 @@ function Home() {
                                     </span>
                                 </div>
                                 <div className="card-body text-center p-4 pt-5">
-                                    <h4 className="mb-3">Premium</h4>
+                                    <h4 className="mb-3">Next-Day</h4>
                                     <div className="mb-3">
-                                        <span className="h1 fw-bold">$35</span>
-                                        <span className="h6">/load</span>
+                                        <span className="h1 fw-bold">$25</span>
+                                        <span className="h6">/10 lb bag</span>
                                     </div>
-                                    <p className="mb-4" style={{ opacity: 0.9 }}>Ideal for busy professionals & families</p>
+                                    <p className="mb-4" style={{ opacity: 0.9 }}>Next-day turnaround service</p>
                                     <ul className="list-unstyled mb-4" style={{ fontSize: '0.95rem', opacity: 0.9 }}>
-                                        <li className="mb-2">✓ Everything in Basic</li>
+                                        <li className="mb-2">✓ Everything in Self-Wash</li>
                                         <li className="mb-2">✓ Premium Detergents</li>
-                                        <li className="mb-2">✓ Same-Day Service</li>
+                                        <li className="mb-2">✓ Next-Day Service</li>
                                         <li className="mb-2">✓ Fabric Softener Included</li>
-                                        <li className="mb-2">✓ Stain Treatment</li>
+                                        <li className="mb-2">✓ Professional Folding</li>
                                     </ul>
                                     <Link to="/pickup" className="btn btn-light btn-lg w-100" style={{
                                         color: '#667eea',
@@ -496,7 +497,7 @@ function Home() {
                             </div>
                         </div>
 
-                        {/* Business Tier */}
+                        {/* Same-Day Tier */}
                         <div className="col-lg-4 col-md-6 mb-4">
                             <div className="card h-100 border-0 shadow-sm" style={{ 
                                 transition: 'all 0.3s ease',
@@ -511,18 +512,18 @@ function Home() {
                                 e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
                             }}>
                                 <div className="card-body text-center p-4">
-                                    <h4 className="mb-3" style={{ color: '#1e3a8a' }}>Business</h4>
+                                    <h4 className="mb-3" style={{ color: '#1e3a8a' }}>Same-Day</h4>
                                     <div className="mb-3">
-                                        <span className="h1 fw-bold" style={{ color: '#1e3a8a' }}>$50</span>
-                                        <span className="h6">/load</span>
+                                        <span className="h1 fw-bold" style={{ color: '#1e3a8a' }}>$30</span>
+                                        <span className="h6">/10 lb bag</span>
                                     </div>
-                                    <p className="mb-4" style={{ color: '#64748b' }}>For businesses & large volume needs</p>
+                                    <p className="mb-4" style={{ color: '#64748b' }}>For when you need it fast</p>
                                     <ul className="list-unstyled mb-4" style={{ fontSize: '0.95rem', color: '#64748b' }}>
-                                        <li className="mb-2">✓ Everything in Premium</li>
-                                        <li className="mb-2">✓ Bulk Pricing Available</li>
-                                        <li className="mb-2">✓ Priority Service</li>
-                                        <li className="mb-2">✓ Account Management</li>
-                                        <li className="mb-2">✓ Custom Scheduling</li>
+                                        <li className="mb-2">✓ Everything in Next-Day</li>
+                                        <li className="mb-2">✓ Same-Day Service</li>
+                                        <li className="mb-2">✓ Priority Processing</li>
+                                        <li className="mb-2">✓ Express Delivery</li>
+                                        <li className="mb-2">✓ Rush Order Support</li>
                                     </ul>
                                     <Link to="/pickup" className="btn w-100" style={{
                                         background: '#10b981',
@@ -532,7 +533,45 @@ function Home() {
                                         padding: '12px',
                                         borderRadius: '8px'
                                     }}>
-                                        Contact Us
+                                        Get Started
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Add Recurring Service as a separate highlighted section */}
+                    <div className="row justify-content-center mt-4">
+                        <div className="col-lg-6">
+                            <div className="card border-0 shadow-lg" style={{
+                                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                color: 'white'
+                            }}>
+                                <div className="card-body text-center p-4">
+                                    <h4 className="mb-3">Recurring Service</h4>
+                                    <div className="mb-3">
+                                        <span className="h1 fw-bold">$34</span>
+                                        <span className="h6">/10 lb bag</span>
+                                    </div>
+                                    <p className="mb-4" style={{ opacity: 0.9 }}>Discounted weekly recurring service</p>
+                                    <div className="row text-start" style={{ fontSize: '0.95rem', opacity: 0.9 }}>
+                                        <div className="col-6">
+                                            <p className="mb-2">✓ Weekly Pickup</p>
+                                            <p className="mb-2">✓ Consistent Schedule</p>
+                                            <p className="mb-2">✓ Priority Support</p>
+                                        </div>
+                                        <div className="col-6">
+                                            <p className="mb-2">✓ Volume Discount</p>
+                                            <p className="mb-2">✓ Account Management</p>
+                                            <p className="mb-2">✓ Flexible Changes</p>
+                                        </div>
+                                    </div>
+                                    <Link to="/pickup" className="btn btn-light btn-lg w-100 mt-3" style={{
+                                        color: '#10b981',
+                                        fontWeight: '600',
+                                        borderRadius: '8px'
+                                    }}>
+                                        Start Recurring Service
                                     </Link>
                                 </div>
                             </div>

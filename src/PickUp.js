@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import TimePicker from 'react-time-picker';
-import 'react-time-picker/dist/TimePicker.css';
-import bg1 from './images/bg1.jpg';
-import fng4 from './images/fng4.png';
+import { FaCalendarAlt, FaClock, FaWeight, FaMapMarkerAlt, FaUser, FaStickyNote } from 'react-icons/fa';
 
 const TIME_BLOCKS = [
   { label: '7:00 AM - 11:00 AM', value: '07:00-11:00' },
@@ -13,7 +10,41 @@ const TIME_BLOCKS = [
   { label: '3:00 PM - 7:00 PM', value: '15:00-19:00' },
 ];
 
+// Pricing tiers data
+const PRICING_TIERS = [
+  {
+    id: 'self_wash',
+    name: 'Self-Wash',
+    price: 18.00,
+    description: 'We wash, dry, and fold your laundry ourselves',
+    turnaround: '48 hours'
+  },
+  {
+    id: 'next_day',
+    name: 'Next-Day',
+    price: 25.00,
+    description: 'Next-day turnaround service',
+    turnaround: '24 hours',
+    popular: true
+  },
+  {
+    id: 'same_day',
+    name: 'Same-Day',
+    price: 30.00,
+    description: 'For when you need it fast',
+    turnaround: 'Same day'
+  },
+  {
+    id: 'recurring',
+    name: 'Recurring Service',
+    price: 34.00,
+    description: 'Weekly recurring service',
+    turnaround: '24 hours'
+  }
+];
+
 function PickUp() {
+  const location = useLocation();
   const [form, setForm] = useState({
     name: '',
     address: '',
@@ -22,12 +53,20 @@ function PickUp() {
     pickup_time: '',
     dropoff_time: '',
     pickup_date: null,
-    load_amount: 1,
-    notes: '', // <-- Add notes to state
+    weight_lbs: 10,
+    pricing_tier: 'next_day',
+    notes: '',
   });
   const [loading, setLoading] = useState(false);
   const [showAuthAlert, setShowAuthAlert] = useState(false);
   const navigate = useNavigate();
+
+  // Set pricing tier from navigation state if available
+  useEffect(() => {
+    if (location.state?.selectedPricing) {
+      setForm(prev => ({ ...prev, pricing_tier: location.state.selectedPricing }));
+    }
+  }, [location.state]);
 
   // Fetch user info if signed in
   useEffect(() => {
@@ -61,6 +100,18 @@ function PickUp() {
     setShowAuthAlert(false);
   };
 
+  // Get selected pricing tier details
+  const getSelectedTier = () => {
+    return PRICING_TIERS.find(tier => tier.id === form.pricing_tier) || PRICING_TIERS[1];
+  };
+
+  // Calculate price based on weight and selected tier
+  const calculatePrice = () => {
+    const tier = getSelectedTier();
+    const bags = Math.ceil(form.weight_lbs / 10); // Round up to nearest 10lb bag
+    return (tier.price * bags).toFixed(2);
+  };
+
   // Only allow dropoff blocks after pickup block
   const getDropoffBlocks = () => {
     if (!form.pickup_time) return [];
@@ -81,15 +132,11 @@ function PickUp() {
     }
   };
 
-  const handleDateChange = (date) => {
-    setForm({ ...form, pickup_date: date });
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const price = form.load_amount * 20; // Calculate price
+      const price = parseFloat(calculatePrice());
 
       // Use user_id from token if signed in, otherwise use guest id = 2
       let user_id = 2; // default to guest
@@ -118,7 +165,8 @@ function PickUp() {
           address: fullAddress,
           price,
           user_id,
-          notes: form.notes // <-- Send notes to API
+          load_amount: Math.ceil(form.weight_lbs / 10), // Keep for compatibility
+          notes: form.notes
         })
       });
       const data = await response.json();
@@ -134,7 +182,8 @@ function PickUp() {
               address: fullAddress,
               user_id,
               confirm_number: data.confirm_number || '',
-              notes: form.notes // <-- Pass notes to payment page
+              notes: form.notes,
+              pricing_tier_name: getSelectedTier().name
             }
           }
         });
@@ -148,296 +197,301 @@ function PickUp() {
   };
 
   return (
-    <div className="container mt-5" style={{ maxWidth: '500px', position: 'relative', zIndex: 1 }}>
+    <div className="min-vh-100" style={{ background: 'linear-gradient(135deg, #f8faff 0%, #e3f2fd 100%)' }}>
       {/* Auth Alert Modal */}
       {showAuthAlert && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0, left: 0, width: '100vw', height: '100vh',
-            background: 'rgba(0,0,0,0.45)',
-            zIndex: 9999,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <div
-            style={{
-              background: '#fff',
-              borderRadius: 12,
-              padding: '32px 24px',
-              maxWidth: 350,
-              width: '90%',
-              boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
-              textAlign: 'center'
-            }}
-          >
-            <h4 className="mb-3">Welcome!</h4>
-            <p>Would you like to sign in or continue as a guest?</p>
-            <button className="btn btn-primary w-100 mb-2" onClick={handleSignIn}>
-              Sign In
-            </button>
-            <button className="btn btn-outline-secondary w-100" onClick={handleContinueGuest}>
-              Continue as Guest
-            </button>
+        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          zIndex: 9999
+        }}>
+          <div className="card border-0 shadow-lg" style={{ maxWidth: '400px', width: '90%' }}>
+            <div className="card-body text-center p-4">
+              <h4 className="mb-3">Welcome!</h4>
+              <p className="text-muted mb-4">Would you like to sign in or continue as a guest?</p>
+              <button className="btn btn-primary w-100 mb-2" onClick={handleSignIn}>
+                Sign In
+              </button>
+              <button className="btn btn-outline-secondary w-100" onClick={handleContinueGuest}>
+                Continue as Guest
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Transparent background image */}
-      <div
-        style={{
-          backgroundImage: `url(${bg1})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          opacity: 0.12,
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          zIndex: 0,
-          pointerEvents: 'none',
-        }}
-      />
-      {/* Logo above the title */}
-      <div className="text-center" style={{ position: 'relative', zIndex: 1 }}>
-        <img
-          src={fng4}
-          alt="Fold N Go Logo"
-          style={{
-            width: 100,
-            height: 100,
-            objectFit: 'contain',
-            marginBottom: 12,
-          }}
-        />
-      </div>
-      <h2 className="mb-4 text-center" style={{ position: 'relative', zIndex: 1 }}>Pick Up Order</h2>
-      {/* Order Progress Tracker */}
-      <OrderProgress currentStep={1} />
-      <form onSubmit={handleSubmit} style={{ position: 'relative', zIndex: 1 }}>
-        {/* Modern form inputs with floating labels */}
-        <div className="form-floating mb-3">
-          <input
-            type="text"
-            className="form-control"
-            id="name"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            placeholder="Full Name"
-            style={{
-              borderRadius: '12px',
-              border: '2px solid #e2e8f0',
-              fontSize: '1rem',
-              padding: '12px 16px',
-              transition: 'all 0.3s ease'
-            }}
-            onFocus={e => e.target.style.borderColor = '#3b82f6'}
-            onBlur={e => e.target.style.borderColor = '#e2e8f0'}
-            required
-          />
-          <label htmlFor="name">Full Name</label>
-        </div>
-        <div className="mb-3">
-          <label htmlFor="address" className="form-label">Address</label>
-          <input
-            type="text"
-            className="form-control"
-            id="address"
-            name="address"
-            value={form.address}
-            onChange={handleChange}
-            required
-            placeholder="Street Address"
-            style={{
-              background: '#cfe2ff',
-              color: '#222',
-              border: '1px solid #86b7fe'
-            }}
-          />
-          {/* City and Zip Code fields inline */}
-          <div style={{ display: 'flex', gap: '8px', marginTop: 8 }}>
-            <input
-              type="text"
-              className="form-control"
-              id="city"
-              name="city"
-              value={form.city || ''}
-              onChange={handleChange}
-              required
-              placeholder="City"
-              style={{
-                background: '#e9ecef',
-                color: '#222',
-                border: '1px solid #86b7fe',
-                fontSize: '0.95rem',
-                width: '60%'
-              }}
-            />
-            <input
-              type="text"
-              className="form-control"
-              id="zip"
-              name="zip"
-              value={form.zip || ''}
-              onChange={handleChange}
-              required
-              placeholder="Zip"
-              style={{
-                background: '#e9ecef',
-                color: '#222',
-                border: '1px solid #86b7fe',
-                fontSize: '0.95rem',
-                width: '40%'
-              }}
-              maxLength={10}
-            />
+      {/* Header */}
+      <div className="container-fluid py-4" style={{
+        background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%)'
+      }}>
+        <div className="container">
+          <div className="text-center text-white">
+            <h1 className="h3 mb-2">Schedule Your Pickup</h1>
+            <p className="mb-0 opacity-75">Quick and easy laundry service booking</p>
           </div>
         </div>
-        <div className="mb-3">
-          <label htmlFor="pickupDate" className="form-label" style={{ marginRight: 8 }}>Pick Up Date</label>
-          <DatePicker
-            selected={form.pickup_date} // <-- use pickup_date
-            onChange={date => setForm({ ...form, pickup_date: date })} // <-- update pickup_date
-            className="form-control"
-            id="pickupDate"
-            name="pickup_date"
-            required
-            dateFormat="yyyy-MM-dd"
-            minDate={new Date()}
-            placeholderText="Select a date"
-            style={{
-              background: '#cfe2ff',
-              color: '#222',
-              border: '1px solid #86b7fe',
-            }}
-          />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="pickupTime" className="form-label">Pick Up Time Block</label>
-          <select
-            className="form-select"
-            id="pickupTime"
-            name="pickup_time"
-            value={form.pickup_time}
-            onChange={handleChange}
-            required
-            style={{
-              background: '#cfe2ff',
-              color: '#222',
-              border: '1px solid #86b7fe'
-            }}
-          >
-            <option value="">Select time block</option>
-            {TIME_BLOCKS.map(block => (
-              <option key={block.value} value={block.value}>{block.label}</option>
-            ))}
-          </select>
-        </div>
-        <div className="mb-3">
-          <label htmlFor="loadAmount" className="form-label">Load Amount (1-20)</label>
-          <input
-            type="number"
-            className="form-control"
-            id="loadAmount"
-            name="loadAmount"
-            min="1"
-            max="20"
-            value={form.loadAmount}
-            onChange={handleChange}
-            required
-            style={{
-              background: '#cfe2ff',
-              color: '#222',
-              border: '1px solid #86b7fe'
-            }}
-          />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="dropoffTime" className="form-label">Drop Off Time Block (after pickup)</label>
-          <select
-            className="form-select"
-            id="dropoffTime"
-            name="dropoff_time"
-            value={form.dropoff_time}
-            onChange={handleChange}
-            required
-            disabled={!form.pickup_time || getDropoffBlocks().length === 0}
-            style={{
-              background: '#cfe2ff',
-              color: '#222',
-              border: '1px solid #86b7fe'
-            }}
-          >
-            <option value="">Select time block</option>
-            {getDropoffBlocks().map(block => (
-              <option key={block.value} value={block.value}>{block.label}</option>
-            ))}
-          </select>
-          {form.pickup_time && getDropoffBlocks().length === 0 && (
-            <div className="form-text text-danger">
-              No available drop off blocks after selected pickup time.
+      </div>
+
+      <div className="container py-4" style={{ maxWidth: '800px' }}>
+        {/* Order Progress Tracker */}
+        <OrderProgress currentStep={1} />
+
+        <div className="row">
+          {/* Main Form */}
+          <div className="col-lg-8">
+            <div className="card border-0 shadow-sm">
+              <div className="card-header bg-white py-3">
+                <h5 className="mb-0">Order Details</h5>
+              </div>
+              <div className="card-body">
+                <form onSubmit={handleSubmit}>
+                  {/* Service Selection - Compact Cards */}
+                  <div className="mb-4">
+                    <label className="form-label fw-bold mb-3">Choose Your Service</label>
+                    <div className="row g-2">
+                      {PRICING_TIERS.map((tier) => (
+                        <div key={tier.id} className="col-6">
+                          <div 
+                            className={`card h-100 ${form.pricing_tier === tier.id ? 'border-primary bg-light' : ''}`}
+                            style={{ cursor: 'pointer', transition: 'all 0.2s' }}
+                            onClick={() => setForm({ ...form, pricing_tier: tier.id })}
+                          >
+                            {tier.popular && (
+                              <div className="position-absolute top-0 start-50 translate-middle">
+                                <span className="badge bg-warning text-dark px-2" style={{ fontSize: '0.6rem' }}>
+                                  POPULAR
+                                </span>
+                              </div>
+                            )}
+                            <div className="card-body text-center p-2">
+                              <input
+                                type="radio"
+                                name="pricing_tier"
+                                value={tier.id}
+                                checked={form.pricing_tier === tier.id}
+                                onChange={handleChange}
+                                className="form-check-input me-2"
+                              />
+                              <h6 className="card-title mb-1 small">{tier.name}</h6>
+                              <div className="text-primary fw-bold small">${tier.price}/bag</div>
+                              <small className="text-success">{tier.turnaround}</small>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Customer Info - Two Columns */}
+                  <div className="row mb-3">
+                    <div className="col-md-6">
+                      <label className="form-label">
+                        <FaUser className="me-1 text-primary" />
+                        Full Name
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="name"
+                        value={form.name}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">
+                        <FaWeight className="me-1 text-primary" />
+                        Weight (lbs)
+                      </label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        name="weight_lbs"
+                        min="1"
+                        max="100"
+                        value={form.weight_lbs}
+                        onChange={handleChange}
+                        required
+                      />
+                      <small className="text-muted">Priced per 10 lb bag</small>
+                    </div>
+                  </div>
+
+                  {/* Address - Compact Layout */}
+                  <div className="mb-3">
+                    <label className="form-label">
+                      <FaMapMarkerAlt className="me-1 text-primary" />
+                      Address
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control mb-2"
+                      name="address"
+                      value={form.address}
+                      onChange={handleChange}
+                      placeholder="Street Address"
+                      required
+                    />
+                    <div className="row g-2">
+                      <div className="col-8">
+                        <input
+                          type="text"
+                          className="form-control"
+                          name="city"
+                          value={form.city}
+                          onChange={handleChange}
+                          placeholder="City"
+                          required
+                        />
+                      </div>
+                      <div className="col-4">
+                        <input
+                          type="text"
+                          className="form-control"
+                          name="zip"
+                          value={form.zip}
+                          onChange={handleChange}
+                          placeholder="Zip"
+                          required
+                          maxLength={10}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Date and Time - Two Columns */}
+                  <div className="row mb-3">
+                    <div className="col-md-6">
+                      <label className="form-label">
+                        <FaCalendarAlt className="me-1 text-primary" />
+                        Pickup Date
+                      </label>
+                      <DatePicker
+                        selected={form.pickup_date}
+                        onChange={date => setForm({ ...form, pickup_date: date })}
+                        className="form-control"
+                        required
+                        dateFormat="yyyy-MM-dd"
+                        minDate={new Date()}
+                        placeholderText="Select date"
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">
+                        <FaClock className="me-1 text-primary" />
+                        Pickup Time
+                      </label>
+                      <select
+                        className="form-select"
+                        name="pickup_time"
+                        value={form.pickup_time}
+                        onChange={handleChange}
+                        required
+                      >
+                        <option value="">Select time</option>
+                        {TIME_BLOCKS.map(block => (
+                          <option key={block.value} value={block.value}>{block.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Dropoff Time */}
+                  <div className="mb-3">
+                    <label className="form-label">
+                      <FaClock className="me-1 text-primary" />
+                      Dropoff Time (after pickup)
+                    </label>
+                    <select
+                      className="form-select"
+                      name="dropoff_time"
+                      value={form.dropoff_time}
+                      onChange={handleChange}
+                      required
+                      disabled={!form.pickup_time || getDropoffBlocks().length === 0}
+                    >
+                      <option value="">Select dropoff time</option>
+                      {getDropoffBlocks().map(block => (
+                        <option key={block.value} value={block.value}>{block.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Notes - Compact */}
+                  <div className="mb-4">
+                    <label className="form-label">
+                      <FaStickyNote className="me-1 text-primary" />
+                      Special Instructions (optional)
+                    </label>
+                    <textarea
+                      className="form-control"
+                      name="notes"
+                      value={form.notes}
+                      onChange={handleChange}
+                      placeholder="Any special instructions..."
+                      rows={2}
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="btn btn-primary w-100 btn-lg"
+                    disabled={loading}
+                  >
+                    {loading ? 'Processing...' : `Continue to Payment - $${calculatePrice()}`}
+                  </button>
+                </form>
+              </div>
             </div>
-          )}
-          {form.pickup_time && getDropoffBlocks().length > 0 && (
-            <div className="form-text">
-              Must be after pickup block.
+          </div>
+
+          {/* Order Summary Sidebar */}
+          <div className="col-lg-4">
+            <div className="card border-0 shadow-sm position-sticky" style={{ top: '20px' }}>
+              <div className="card-header bg-primary text-white py-3">
+                <h6 className="mb-0">Order Summary</h6>
+              </div>
+              <div className="card-body">
+                <div className="d-flex justify-content-between mb-2">
+                  <span>Service:</span>
+                  <span className="fw-bold">{getSelectedTier().name}</span>
+                </div>
+                <div className="d-flex justify-content-between mb-2">
+                  <span>Weight:</span>
+                  <span>{form.weight_lbs} lbs</span>
+                </div>
+                <div className="d-flex justify-content-between mb-2">
+                  <span>Bags:</span>
+                  <span>{Math.ceil(form.weight_lbs / 10)} × 10 lb</span>
+                </div>
+                <div className="d-flex justify-content-between mb-2">
+                  <span>Rate:</span>
+                  <span>${getSelectedTier().price}/bag</span>
+                </div>
+                <hr />
+                <div className="d-flex justify-content-between">
+                  <span className="fw-bold">Total:</span>
+                  <span className="fw-bold text-primary h5">${calculatePrice()}</span>
+                </div>
+                
+                {/* Service Details */}
+                <div className="mt-3 p-3" style={{ backgroundColor: '#f8faff', borderRadius: '8px' }}>
+                  <h6 className="text-primary mb-2">{getSelectedTier().name}</h6>
+                  <p className="small text-muted mb-1">{getSelectedTier().description}</p>
+                  <p className="small text-success mb-0">
+                    <i className="fas fa-clock me-1"></i>
+                    {getSelectedTier().turnaround}
+                  </p>
+                </div>
+              </div>
             </div>
-          )}
+          </div>
         </div>
-        <div className="mb-3">
-          <label htmlFor="notes" className="form-label">Order Notes (optional)</label>
-          <textarea
-            className="form-control"
-            id="notes"
-            name="notes"
-            value={form.notes}
-            onChange={handleChange}
-            placeholder="Add any special instructions or notes for your order"
-            rows={3}
-            style={{
-              background: '#e9ecef',
-              color: '#222',
-              border: '1px solid #86b7fe'
-            }}
-          />
-        </div>
-        {/* Price element */}
-        <div className="mb-3">
-          <label className="form-label">Estimated Price</label>
-          <input
-            type="text"
-            className="form-control"
-            value={
-              Number.isFinite(Number(form.load_amount))
-                ? `$${(Number(form.load_amount) * 20).toFixed(2)}`
-                : '$0.00'
-            }
-            readOnly
-            style={{
-              background: '#e9ecef',
-              color: '#222',
-              border: '1px solid #86b7fe'
-            }}
-          />
-        </div>
-        <button
-          type="submit"
-          className="btn btn-primary w-100"
-          style={{ position: 'relative', zIndex: 1 }}
-          disabled={loading}
-        >
-          {loading ? 'Submitting...' : 'Submit Order'}
-        </button>
-      </form>
+      </div>
     </div>
   );
 }
 
-// Add to PickUp.js - Visual order process
+// Order Progress Component
 const OrderProgress = ({ currentStep = 1 }) => {
   const steps = [
     { icon: 'calendar-plus', label: 'Schedule' },
@@ -447,25 +501,28 @@ const OrderProgress = ({ currentStep = 1 }) => {
   ];
 
   return (
-    <div className="progress-tracker mb-4">
+    <div className="mb-4">
       <div className="d-flex justify-content-between align-items-center">
         {steps.map((step, index) => (
-          <div key={index} className="text-center">
-            <div className={`step-circle ${index + 1 <= currentStep ? 'active' : ''}`} style={{
-              width: '50px', height: '50px',
-              borderRadius: '50%',
-              background: index + 1 <= currentStep ? '#10b981' : '#e2e8f0',
-              color: index + 1 <= currentStep ? 'white' : '#64748b',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 8px'
-            }}>
-              <i className={`fas fa-${step.icon}`}></i>
+          <div key={index} className="text-center flex-fill">
+            <div className={`mx-auto mb-2 d-flex align-items-center justify-content-center ${
+              index + 1 <= currentStep ? 'bg-success text-white' : 'bg-light text-muted'
+            }`} style={{ width: '40px', height: '40px', borderRadius: '50%' }}>
+              <i className={`fas fa-${step.icon} fa-sm`}></i>
             </div>
             <small className={index + 1 <= currentStep ? 'text-success fw-bold' : 'text-muted'}>
               {step.label}
             </small>
+            {index < steps.length - 1 && (
+              <div className="position-absolute" style={{
+                width: '100%',
+                height: '2px',
+                backgroundColor: index + 1 < currentStep ? '#10b981' : '#e5e7eb',
+                top: '20px',
+                left: '50%',
+                zIndex: -1
+              }} />
+            )}
           </div>
         ))}
       </div>
