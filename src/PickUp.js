@@ -135,6 +135,7 @@ function PickUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    
     try {
       const price = parseFloat(calculatePrice());
 
@@ -153,46 +154,34 @@ function PickUp() {
         ? form.pickup_date.toISOString().slice(0, 10)
         : '';
 
-      const API_URL = process.env.REACT_APP_API_URL;
-      const response = await fetch(`${API_URL}/api/pickups`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          ...form,
-          pickup_date: pickupDateStr,
-          address: fullAddress,
-          price,
-          user_id,
-          load_amount: Math.ceil(form.weight_lbs / 10), // Keep for compatibility
-          notes: form.notes
-        })
+      // Prepare pickup info for payment page - DON'T create pickup order yet
+      const pickupInfo = {
+        user_id,
+        name: form.name,
+        address: fullAddress,
+        pickup_date: pickupDateStr,
+        pickup_time: form.pickup_time,
+        dropoff_time: form.dropoff_time,
+        pricing_tier: form.pricing_tier, // Backend field name
+        pricing_tier_name: getSelectedTier().name, // Display name
+        weight_lbs: form.weight_lbs,
+        load_amount: Math.ceil(form.weight_lbs / 10), // Keep for compatibility
+        notes: form.notes || '',
+        user_phone: form.phone || '' // Add if you have phone in form
+      };
+
+      // Navigate to payment page with all the pickup info
+      navigate('/payments', {
+        state: {
+          amount: price,
+          pickupInfo: pickupInfo
+        }
       });
-      const data = await response.json();
-      if (response.ok && data.success) {
-        alert(data.message || 'Pickup order created successfully!');
-        // Redirect to payment page with price as state, include confirm_number from API response
-        navigate('/payments', {
-          state: {
-            amount: price,
-            pickupInfo: {
-              ...form,
-              pickup_date: pickupDateStr,
-              address: fullAddress,
-              user_id,
-              confirm_number: data.confirm_number || '',
-              notes: form.notes,
-              pricing_tier_name: getSelectedTier().name
-            }
-          }
-        });
-      } else {
-        alert(data.error || 'Failed to create pickup order.');
-      }
+
     } catch (err) {
-      alert('Error: ' + err.message);
+      alert('Error preparing order: ' + err.message);
     }
+    
     setLoading(false);
   };
 
