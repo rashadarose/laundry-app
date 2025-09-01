@@ -83,22 +83,55 @@ function PaymentForm() {
 
         try {
             const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
-            const res = await fetch(`${API_URL}/api/checkout`, {
+            
+            // Step 1: Create the pickup order first
+            setMessage('Creating order...');
+            const orderRes = await fetch(`${API_URL}/api/pickups`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...pickupInfo,
+                    phone: phone.replace(/\D/g, ''), // clean phone number
+                    status: 'pending_payment' // Mark as pending payment
+                }),
+            });
+
+            const orderData = await orderRes.json();
+            
+            if (!orderData.success) {
+                setMessage(orderData.error || 'Failed to create order. Please try again.');
+                setMessageType('danger');
+                setLoading(false);
+                return;
+            }
+
+            // Step 2: Process payment with the order ID
+            setMessage('Processing payment...');
+            const paymentRes = await fetch(`${API_URL}/api/checkout`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     amount: Math.round(totalAmount * 100), // convert to cents
                     paymentMethodId: paymentMethod.id,
-                    phone: phone.replace(/\D/g, '') // clean phone number
+                    phone: phone.replace(/\D/g, ''), // clean phone number
+                    pickupId: orderData.orderId // Use the order ID from step 1
                 }),
             });
             
-            const data = await res.json();
+            const paymentData = await paymentRes.json();
             
-            if (data.success) {
+            if (paymentData.success) {
                 cardElement.clear();
-                // Store confirmation data
-                localStorage.setItem('confirmation_pickupInfo', JSON.stringify(pickupInfo));
+                
+                // Store confirmation data with order ID
+                const confirmationData = {
+                    ...pickupInfo,
+                    id: orderData.orderId,
+                    confirm_number: `FNG${orderData.orderId}`,
+                    user_phone: phone.replace(/\D/g, '')
+                };
+                
+                localStorage.setItem('confirmation_pickupInfo', JSON.stringify(confirmationData));
                 localStorage.setItem('confirmation_amount', totalAmount.toString());
                 
                 setMessage('Payment successful! Redirecting...');
@@ -107,14 +140,15 @@ function PaymentForm() {
                 setTimeout(() => {
                     navigate('/confirmation', { 
                         state: { 
-                            pickupInfo, 
+                            pickupInfo: confirmationData, 
                             amount: totalAmount,
                             paymentMethod: 'card'
                         } 
                     });
                 }, 1500);
             } else {
-                setMessage(data.error || 'Payment failed. Please try again.');
+                // If payment fails, optionally update order status to failed
+                setMessage(paymentData.error || 'Payment failed. Please try again.');
                 setMessageType('danger');
             }
         } catch (err) {
