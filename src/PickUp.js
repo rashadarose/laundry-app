@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { FaCalendarAlt, FaClock, FaWeight, FaMapMarkerAlt, FaUser, FaStickyNote } from 'react-icons/fa';
+import { FaCalendarAlt, FaClock, FaWeight, FaMapMarkerAlt, FaUser, FaStickyNote, FaPhone } from 'react-icons/fa';
 
 const TIME_BLOCKS = [
   { label: '7:00 AM - 11:00 AM', value: '07:00-11:00' },
@@ -47,6 +47,8 @@ function PickUp() {
   const location = useLocation();
   const [form, setForm] = useState({
     name: '',
+    email: '',
+    phone: '',
     address: '',
     city: '',
     zip: '',
@@ -82,6 +84,7 @@ function PickUp() {
           setForm(prev => ({
             ...prev,
             name: user.name || '',
+            phone: user.phone || '',
             address: user.address ? user.address.split(',')[0] : '',
             city: user.address ? user.address.split(',')[1]?.trim() || '' : '',
             zip: user.address ? user.address.split(',')[2]?.trim() || '' : '',
@@ -137,6 +140,43 @@ function PickUp() {
     setLoading(true);
     
     try {
+      // Add validation for required fields
+      if (!form.name.trim()) {
+        alert('Please enter your name');
+        setLoading(false);
+        return;
+      }
+
+      if (!form.email.trim()) {
+        alert('Please enter your email');
+        setLoading(false);
+        return;
+      }
+
+      if (!form.phone.trim()) {
+        alert('Please enter your phone number');
+        setLoading(false);
+        return;
+      }
+
+      if (!form.pickup_date) {
+        alert('Please select a pickup date');
+        setLoading(false);
+        return;
+      }
+
+      if (!form.pickup_time) {
+        alert('Please select a pickup time');
+        setLoading(false);
+        return;
+      }
+
+      if (!form.dropoff_time) {
+        alert('Please select a dropoff time');
+        setLoading(false);
+        return;
+      }
+
       const price = parseFloat(calculatePrice());
 
       // Use user_id from token if signed in, otherwise use guest id = 2
@@ -149,15 +189,26 @@ function PickUp() {
       // Concatenate address, city, and zip for the address field
       const fullAddress = `${form.address}, ${form.city}, ${form.zip}`;
 
-      // Convert pickup_date to YYYY-MM-DD string
+      // Convert pickup_date to YYYY-MM-DD string with validation
       const pickupDateStr = form.pickup_date
         ? form.pickup_date.toISOString().slice(0, 10)
-        : '';
+        : null;
+
+      // Debug logging
+      console.log('Form pickup_date:', form.pickup_date);
+      console.log('Converted pickup_date string:', pickupDateStr);
+      console.log('Form data being prepared:', {
+        pickup_date: pickupDateStr,
+        pickup_time: form.pickup_time,
+        dropoff_time: form.dropoff_time
+      });
 
       // Prepare pickup info for payment page - DON'T create pickup order yet
       const pickupInfo = {
         user_id,
         name: form.name,
+        email: form.email,
+        phone: form.phone,
         address: fullAddress,
         pickup_date: pickupDateStr,
         pickup_time: form.pickup_time,
@@ -166,8 +217,7 @@ function PickUp() {
         pricing_tier_name: getSelectedTier().name, // Display name
         weight_lbs: form.weight_lbs,
         load_amount: Math.ceil(form.weight_lbs / 10), // Keep for compatibility
-        notes: form.notes || '',
-        user_phone: form.phone || '' // Add if you have phone in form
+        notes: form.notes || ''
       };
 
       // Navigate to payment page with all the pickup info
@@ -286,6 +336,41 @@ function PickUp() {
                         required
                       />
                     </div>
+                    <div className="col-md-6">
+                      <label className="form-label">
+                        Email Address
+                      </label>
+                      <input
+                        type="email"
+                        className="form-control"
+                        name="email"
+                        value={form.email}
+                        onChange={handleChange}
+                        placeholder="your.email@example.com"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="row mb-3">
+                    <div className="col-md-6">
+                      <label className="form-label">
+                        <FaPhone className="me-1 text-primary" />
+                        Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        className="form-control"
+                        name="phone"
+                        value={form.phone}
+                        onChange={handleChange}
+                        placeholder="(123) 456-7890"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="row mb-3">
                     <div className="col-md-6">
                       <label className="form-label">
                         <FaWeight className="me-1 text-primary" />

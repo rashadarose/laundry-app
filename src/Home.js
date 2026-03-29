@@ -102,13 +102,15 @@ function Home() {
             Schedule Pickup
           </Link>
           
-          <button 
+          <Link 
+            to="/how-it-works"
             className="btn btn-outline-light btn-lg px-4 py-3"
             style={{
               borderWidth: '2px',
               borderRadius: '12px',
               fontWeight: '600',
-              transition: 'all 0.3s ease'
+              transition: 'all 0.3s ease',
+              textDecoration: 'none'
             }}
             onMouseEnter={e => {
               e.target.style.background = 'rgba(255,255,255,0.1)';
@@ -121,7 +123,7 @@ function Home() {
           >
             <i className="fas fa-play me-2"></i>
             How It Works
-          </button>
+          </Link>
         </div>
       </div>
       

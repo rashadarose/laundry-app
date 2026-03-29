@@ -34,23 +34,11 @@ function PaymentForm() {
     const taxes = +(baseAmount * taxRate).toFixed(2);
     const totalAmount = +(baseAmount + processingFee + taxes).toFixed(2);
 
-    const [phone, setPhone] = useState(pickupInfo?.user_phone || '');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState('danger');
     const stripe = useStripe();
     const elements = useElements();
-
-    const handlePhoneChange = (e) => {
-        // Format phone number as user types
-        let value = e.target.value.replace(/\D/g, '');
-        if (value.length >= 6) {
-            value = `(${value.slice(0, 3)}) ${value.slice(3, 6)}-${value.slice(6, 10)}`;
-        } else if (value.length >= 3) {
-            value = `(${value.slice(0, 3)}) ${value.slice(3)}`;
-        }
-        setPhone(value);
-    };
 
     const handleCancel = () => {
         navigate('/pickup');
@@ -84,6 +72,12 @@ function PaymentForm() {
         try {
             const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
             
+            // Debug logging before creating order
+            console.log('About to create pickup order with data:', {
+                ...pickupInfo,
+                status: 'pending_payment'
+            });
+            
             // Step 1: Create the pickup order first
             setMessage('Creating order...');
             const orderRes = await fetch(`${API_URL}/api/pickups`, {
@@ -91,7 +85,6 @@ function PaymentForm() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...pickupInfo,
-                    phone: phone.replace(/\D/g, ''), // clean phone number
                     status: 'pending_payment' // Mark as pending payment
                 }),
             });
@@ -113,7 +106,6 @@ function PaymentForm() {
                 body: JSON.stringify({
                     amount: Math.round(totalAmount * 100), // convert to cents
                     paymentMethodId: paymentMethod.id,
-                    phone: phone.replace(/\D/g, ''), // clean phone number
                     pickupId: orderData.orderId // Use the order ID from step 1
                 }),
             });
@@ -127,8 +119,7 @@ function PaymentForm() {
                 const confirmationData = {
                     ...pickupInfo,
                     id: orderData.orderId,
-                    confirm_number: `FNG${orderData.orderId}`,
-                    user_phone: phone.replace(/\D/g, '')
+                    confirm_number: `FNG${orderData.orderId}`
                 };
                 
                 localStorage.setItem('confirmation_pickupInfo', JSON.stringify(confirmationData));
@@ -313,24 +304,6 @@ function PaymentForm() {
                                 <small className="text-muted">
                                     <FaLock className="me-1" />
                                     Your payment information is encrypted and secure
-                                </small>
-                            </div>
-
-                            {/* Phone Number */}
-                            <div className="mb-4">
-                                <label htmlFor="phone" className="form-label">Phone Number</label>
-                                <input
-                                    type="tel"
-                                    className="form-control"
-                                    id="phone"
-                                    value={phone}
-                                    onChange={handlePhoneChange}
-                                    placeholder="(555) 123-4567"
-                                    maxLength={14}
-                                    required
-                                />
-                                <small className="text-muted">
-                                    We'll send pickup confirmation and updates to this number
                                 </small>
                             </div>
 
