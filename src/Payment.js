@@ -86,7 +86,7 @@ const getServicePrice = () => {
             // Debug logging before creating order
             console.log('About to create pickup order with data:', {
                 ...pickupInfo,
-                status: 'pending_payment'
+                status: 'received' // Mark as received for initial creation
             });
             
             // Step 1: Create the pickup order first
@@ -96,7 +96,7 @@ const getServicePrice = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...pickupInfo,
-                    status: 'pending_payment' // Mark as pending payment
+                    status: 'received' // Mark as received for initial creation
                 }),
             });
 
