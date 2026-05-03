@@ -14,18 +14,29 @@ function PaymentForm() {
     const passedAmount = location.state?.amount;
     
     // Calculate pricing with proper fallbacks
-    const getServicePrice = () => {
-        if (pickupInfo?.pricing_tier_name) {
-            const tierPrices = {
-                'Self-Wash': 18.00,
-                'Next-Day': 25.00,
-                'Same-Day': 30.00,
-                'Recurring Service': 34.00
-            };
-            return tierPrices[pickupInfo.pricing_tier_name] || 25.00;
-        }
-        return 25.00; // default
-    };
+    // const getServicePrice = () => {
+    //     if (pickupInfo?.pricing_tier_name) {
+    //         const tierPrices = {
+    //             'Self-Wash': 18.00,
+    //             'Next-Day': 25.00,
+    //             'Same-Day': 30.00,
+    //             'Recurring Service': 34.00
+    //         };
+    //         return tierPrices[pickupInfo.pricing_tier_name] || 25.00;
+    //     }
+    //     return 25.00; // default
+    // };
+
+    const tierPrices = {
+  self_wash: 18.00,
+  next_day: 25.00,
+  same_day: 30.00,
+  recurring: 34.00
+};
+
+const getServicePrice = () => {
+  return tierPrices[pickupInfo?.pricing_tier] || 25.00;
+};
 
     const bags = pickupInfo?.weight_lbs ? Math.ceil(pickupInfo.weight_lbs / 10) : 1;
     const baseAmount = bags * getServicePrice();
@@ -176,7 +187,7 @@ function PaymentForm() {
                             <h6 className="text-muted">Service Details</h6>
                             <div className="d-flex justify-content-between mb-1">
                                 <span>Service Type:</span>
-                                <span className="fw-bold">{pickupInfo.pricing_tier_name || 'Next-Day'}</span>
+                                <span className="fw-bold">{pickupInfo.pricing_tier_name || 'next-day'}</span>
                             </div>
                             <div className="d-flex justify-content-between mb-1">
                                 <span>Weight:</span>
