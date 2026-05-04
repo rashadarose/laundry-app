@@ -357,7 +357,7 @@ function App() {
             <Route path="/services" element={<Services />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/payments" element={<Payment />} />
+            <Route path="/payment" element={<Payment />} />
             <Route path="/confirmation" element={<Confirmation />} />
             <Route path="/comingsoon" element={<ComingSoon />} />
             <Route path="/faq" element={<FAQ />} />

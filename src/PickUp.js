@@ -221,7 +221,7 @@ function PickUp() {
       };
 
       // Navigate to payment page with all the pickup info
-      navigate('/payments', {
+      navigate('/payment', {
         state: {
           amount: price,
           pickupInfo: pickupInfo

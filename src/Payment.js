@@ -11,7 +11,6 @@ function PaymentForm() {
     const location = useLocation();
     const navigate = useNavigate();
     const pickupInfo = location.state?.pickupInfo;
-    const passedAmount = location.state?.amount;
     
     // Calculate pricing with proper fallbacks
     // const getServicePrice = () => {
@@ -85,8 +84,7 @@ const getServicePrice = () => {
             
             // Debug logging before creating order
             console.log('About to create pickup order with data:', {
-                ...pickupInfo,
-                // status: 'received' // Mark as received for initial creation
+                ...pickupInfo
             });
             
             // Step 1: Create the pickup order first
@@ -95,15 +93,16 @@ const getServicePrice = () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    ...pickupInfo,
-                    // status: 'received' // Mark as received for initial creation
+                    ...pickupInfo
                 }),
             });
 
             const orderData = await orderRes.json();
             
-            if (!orderData.success) {
-                setMessage(orderData.error || 'Failed to create order. Please try again.');
+            if (!orderRes.ok || !orderData.success) {
+                const errorMsg = orderData.error || 
+                    `Order creation failed (${orderRes.status}). Please try again.`;
+                setMessage(errorMsg);
                 setMessageType('danger');
                 setLoading(false);
                 return;
@@ -123,36 +122,40 @@ const getServicePrice = () => {
             
             const paymentData = await paymentRes.json();
             
-            if (paymentData.success) {
-                cardElement.clear();
-                
-                // Store confirmation data with order ID
-                const confirmationData = {
-                    ...pickupInfo,
-                    id: orderData.orderId,
-                    confirm_number: `FNG${orderData.orderId}`
-                };
-                
-                localStorage.setItem('confirmation_pickupInfo', JSON.stringify(confirmationData));
-                localStorage.setItem('confirmation_amount', totalAmount.toString());
-                
-                setMessage('Payment successful! Redirecting...');
-                setMessageType('success');
-                
-                setTimeout(() => {
-                    navigate('/confirmation', { 
-                        state: { 
-                            pickupInfo: confirmationData, 
-                            amount: totalAmount,
-                            paymentMethod: 'card'
-                        } 
-                    });
-                }, 1500);
-            } else {
-                // If payment fails, optionally update order status to failed
-                setMessage(paymentData.error || 'Payment failed. Please try again.');
+            if (!paymentRes.ok || !paymentData.success) {
+                const errorMsg = paymentData.error || 
+                    `Payment processing failed (${paymentRes.status}). Please try again.`;
+                setMessage(errorMsg);
                 setMessageType('danger');
+                setLoading(false);
+                return;
             }
+            
+            // Payment successful
+            cardElement.clear();
+            
+            // Store confirmation data with order ID
+            const confirmationData = {
+                ...pickupInfo,
+                id: orderData.orderId,
+                confirm_number: `FNG${orderData.orderId}`
+            };
+            
+            localStorage.setItem('confirmation_pickupInfo', JSON.stringify(confirmationData));
+            localStorage.setItem('confirmation_amount', totalAmount.toString());
+            
+            setMessage('Payment successful! Redirecting...');
+            setMessageType('success');
+            
+            setTimeout(() => {
+                navigate('/confirmation', { 
+                    state: { 
+                        pickupInfo: confirmationData, 
+                        amount: totalAmount,
+                        paymentMethod: 'card'
+                    } 
+                });
+            }, 1500);
         } catch (err) {
             console.error('Payment error:', err);
             setMessage('Network error. Please check your connection and try again.');
