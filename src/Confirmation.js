@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaCheckCircle, FaCalendarAlt, FaClock, FaMapMarkerAlt, FaPhone, FaPrint, FaEnvelope, FaHome, FaPlus } from 'react-icons/fa';
+import OrderProgress from './OrderProgress';
 
 const Confirmation = () => {
   const location = useLocation();
@@ -60,8 +61,7 @@ const Confirmation = () => {
       </div>
 
       {/* Main Content */}
-      <div className="container py-5" style={{ maxWidth: '800px' }}>
-        <div className="row justify-content-center">
+      <div className="container py-5" style={{ maxWidth: '800px' }}>        <OrderProgress currentStep={4} />        <div className="row justify-content-center">
           <div className="col-lg-10">
             {/* Success Message */}
             <div className="card border-0 shadow-sm mb-4" style={{

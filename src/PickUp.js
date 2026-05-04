@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { FaCalendarAlt, FaClock, FaWeight, FaMapMarkerAlt, FaUser, FaStickyNote, FaPhone } from 'react-icons/fa';
+import OrderProgress from './OrderProgress';
 
 const TIME_BLOCKS = [
   { label: '7:00 AM - 11:00 AM', value: '07:00-11:00' },
@@ -13,33 +14,34 @@ const TIME_BLOCKS = [
 // Pricing tiers data
 const PRICING_TIERS = [
   {
-    id: 'self_wash',
-    name: 'Self-Wash',
+    id: 'standard',
+    name: 'Standard',
     price: 18.00,
-    description: 'We wash, dry, and fold your laundry ourselves',
+    description: 'Our regular wash, dry, and fold service',
     turnaround: '48 hours'
   },
   {
     id: 'next_day',
-    name: 'Next-Day',
+    name: 'Express',
     price: 25.00,
-    description: 'Next-day turnaround service',
+    description: 'Faster turnaround for busy schedules',
     turnaround: '24 hours',
     popular: true
   },
   {
     id: 'same_day',
-    name: 'Same-Day',
+    name: 'Rush',
     price: 30.00,
-    description: 'For when you need it fast',
+    description: 'When you need it back the same day',
     turnaround: 'Same day'
   },
   {
     id: 'recurring',
-    name: 'Recurring Service',
-    price: 34.00,
-    description: 'Weekly recurring service',
-    turnaround: '24 hours'
+    name: 'Weekly Plan',
+    price: 16.00,
+    description: 'Weekly service - save with subscription',
+    turnaround: '24 hours',
+    badge: 'SAVE 20%'
   }
 ];
 
@@ -47,7 +49,6 @@ function PickUp() {
   const location = useLocation();
   const [form, setForm] = useState({
     name: '',
-    email: '',
     phone: '',
     address: '',
     city: '',
@@ -55,12 +56,14 @@ function PickUp() {
     pickup_time: '',
     dropoff_time: '',
     pickup_date: null,
-    weight_lbs: 10,
-    pricing_tier: 'next_day',
+    bags: 2,
+    pricing_tier: 'standard',
     notes: '',
   });
   const [loading, setLoading] = useState(false);
   const [showAuthAlert, setShowAuthAlert] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
   const navigate = useNavigate();
 
   // Set pricing tier from navigation state if available
@@ -72,27 +75,51 @@ function PickUp() {
 
   // Fetch user info if signed in
   useEffect(() => {
-    const token = localStorage.getItem('laundry_token');
-    if (!token) {
-      setShowAuthAlert(true);
-    } else {
-      // Fetch user info from API
-      const API_URL = process.env.REACT_APP_API_URL;
-      fetch(`${API_URL}/api/users/${token}`)
-        .then(res => res.json())
-        .then(user => {
+    checkUserSession();
+  }, []);
+
+  const checkUserSession = async () => {
+    try {
+      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
+      const response = await fetch(`${API_URL}/api/auth/session`, {
+        method: 'GET',
+        credentials: 'include', // Important: include cookies for sessions
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        
+        if (data.success && data.user) {
+          setIsSignedIn(true);
+          setUserInfo(data.user);
+          // Prefill form with user data
           setForm(prev => ({
             ...prev,
-            name: user.name || '',
-            phone: user.phone || '',
-            address: user.address ? user.address.split(',')[0] : '',
-            city: user.address ? user.address.split(',')[1]?.trim() || '' : '',
-            zip: user.address ? user.address.split(',')[2]?.trim() || '' : '',
+            name: data.user.name || '',
+            phone: data.user.phone || '',
+            address: data.user.address ? data.user.address.split(',')[0] : '',
+            city: data.user.address ? data.user.address.split(',')[1]?.trim() || '' : '',
+            zip: data.user.address ? data.user.address.split(',')[2]?.trim() || '' : '',
           }));
-        })
-        .catch(() => {});
+        } else {
+          // No active session
+          setIsSignedIn(false);
+          setShowAuthAlert(true);
+        }
+      } else {
+        // No active session
+        setIsSignedIn(false);
+        setShowAuthAlert(true);
+      }
+    } catch (error) {
+      console.error('Session check error:', error);
+      setIsSignedIn(false);
+      setShowAuthAlert(true);
     }
-  }, []);
+  };
 
   const handleSignIn = () => {
     setShowAuthAlert(false);
@@ -108,11 +135,10 @@ function PickUp() {
     return PRICING_TIERS.find(tier => tier.id === form.pricing_tier) || PRICING_TIERS[1];
   };
 
-  // Calculate price based on weight and selected tier
+  // Calculate price based on number of bags and selected tier
   const calculatePrice = () => {
     const tier = getSelectedTier();
-    const bags = Math.ceil(form.weight_lbs / 10); // Round up to nearest 10lb bag
-    return (tier.price * bags).toFixed(2);
+    return (tier.price * form.bags).toFixed(2);
   };
 
   // Only allow dropoff blocks after pickup block
@@ -147,17 +173,8 @@ function PickUp() {
         return;
       }
 
-      if (!form.email.trim()) {
-        alert('Please enter your email');
-        setLoading(false);
-        return;
-      }
-
-      if (!form.phone.trim()) {
-        alert('Please enter your phone number');
-        setLoading(false);
-        return;
-      }
+      // Phone is optional - only needed if we need to call
+      // Email will be collected on payment page
 
       if (!form.pickup_date) {
         alert('Please select a pickup date');
@@ -179,11 +196,10 @@ function PickUp() {
 
       const price = parseFloat(calculatePrice());
 
-      // Use user_id from token if signed in, otherwise use guest id = 2
+      // Use user_id from session if signed in, otherwise use guest id = 2
       let user_id = 2; // default to guest
-      const token = localStorage.getItem('laundry_token');
-      if (token) {
-        user_id = Number(token);
+      if (isSignedIn && userInfo && userInfo.id) {
+        user_id = userInfo.id;
       }
 
       // Concatenate address, city, and zip for the address field
@@ -207,16 +223,14 @@ function PickUp() {
       const pickupInfo = {
         user_id,
         name: form.name,
-        email: form.email,
-        phone: form.phone,
+        phone: form.phone || '', // Optional
         address: fullAddress,
         pickup_date: pickupDateStr,
         pickup_time: form.pickup_time,
         dropoff_time: form.dropoff_time,
         pricing_tier: form.pricing_tier, // Backend field name
         pricing_tier_name: getSelectedTier().name, // Display name
-        weight_lbs: form.weight_lbs,
-        load_amount: Math.ceil(form.weight_lbs / 10), // Keep for compatibility
+        bags: form.bags,
         notes: form.notes || ''
       };
 
@@ -246,13 +260,24 @@ function PickUp() {
           <div className="card border-0 shadow-lg" style={{ maxWidth: '400px', width: '90%' }}>
             <div className="card-body text-center p-4">
               <h4 className="mb-3">Welcome!</h4>
-              <p className="text-muted mb-4">Would you like to sign in or continue as a guest?</p>
-              <button className="btn btn-primary w-100 mb-2" onClick={handleSignIn}>
-                Sign In
-              </button>
-              <button className="btn btn-outline-secondary w-100" onClick={handleContinueGuest}>
-                Continue as Guest
-              </button>
+              {isSignedIn ? (
+                <>
+                  <p className="text-muted mb-4">You're signed in! Your information will be prefilled.</p>
+                  <button className="btn btn-primary w-100" onClick={() => setShowAuthAlert(false)}>
+                    Continue
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="text-muted mb-4">Would you like to sign in for faster checkout?</p>
+                  <button className="btn btn-primary w-100 mb-2" onClick={handleSignIn}>
+                    Sign In for Faster Checkout
+                  </button>
+                  <button className="btn btn-outline-secondary w-100" onClick={handleContinueGuest}>
+                    Continue as Guest
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -265,7 +290,12 @@ function PickUp() {
         <div className="container">
           <div className="text-center text-white">
             <h1 className="h3 mb-2">Schedule Your Pickup</h1>
-            <p className="mb-0 opacity-75">Quick and easy laundry service booking</p>
+            <p className="mb-0 opacity-75">
+              {isSignedIn && userInfo ? 
+                `Welcome back, ${userInfo.name?.split(' ')[0] || 'User'}! Quick and easy laundry service booking` : 
+                'Quick and easy laundry service booking'
+              }
+            </p>
           </div>
         </div>
       </div>
@@ -280,6 +310,12 @@ function PickUp() {
             <div className="card border-0 shadow-sm">
               <div className="card-header bg-white py-3">
                 <h5 className="mb-0">Order Details</h5>
+                {isSignedIn && userInfo && (
+                  <small className="text-success">
+                    <i className="fas fa-check-circle me-1"></i>
+                    Your saved information has been prefilled
+                  </small>
+                )}
               </div>
               <div className="card-body">
                 <form onSubmit={handleSubmit}>
@@ -298,6 +334,13 @@ function PickUp() {
                               <div className="position-absolute top-0 start-50 translate-middle">
                                 <span className="badge bg-warning text-dark px-2" style={{ fontSize: '0.6rem' }}>
                                   POPULAR
+                                </span>
+                              </div>
+                            )}
+                            {tier.badge && (
+                              <div className="position-absolute top-0 end-0">
+                                <span className="badge bg-success text-white px-1" style={{ fontSize: '0.5rem' }}>
+                                  {tier.badge}
                                 </span>
                               </div>
                             )}
@@ -320,8 +363,8 @@ function PickUp() {
                     </div>
                   </div>
 
-                  {/* Customer Info - Two Columns */}
-                  <div className="row mb-3">
+                  {/* Customer Info */}
+                  <div className="row justify-content-center mb-3">
                     <div className="col-md-6">
                       <label className="form-label">
                         <FaUser className="me-1 text-primary" />
@@ -336,27 +379,13 @@ function PickUp() {
                         required
                       />
                     </div>
-                    <div className="col-md-6">
-                      <label className="form-label">
-                        Email Address
-                      </label>
-                      <input
-                        type="email"
-                        className="form-control"
-                        name="email"
-                        value={form.email}
-                        onChange={handleChange}
-                        placeholder="your.email@example.com"
-                        required
-                      />
-                    </div>
                   </div>
 
-                  <div className="row mb-3">
+                  <div className="row justify-content-center mb-3">
                     <div className="col-md-6">
                       <label className="form-label">
                         <FaPhone className="me-1 text-primary" />
-                        Phone Number
+                        Phone Number (optional)
                       </label>
                       <input
                         type="tel"
@@ -365,28 +394,31 @@ function PickUp() {
                         value={form.phone}
                         onChange={handleChange}
                         placeholder="(123) 456-7890"
-                        required
                       />
+                      <small className="text-muted">Only needed if we need to call you</small>
                     </div>
                   </div>
 
-                  <div className="row mb-3">
+                  <div className="row justify-content-center mb-3">
                     <div className="col-md-6">
                       <label className="form-label">
                         <FaWeight className="me-1 text-primary" />
-                        Weight (lbs)
+                        Number of Bags
                       </label>
-                      <input
-                        type="number"
-                        className="form-control"
-                        name="weight_lbs"
-                        min="1"
-                        max="100"
-                        value={form.weight_lbs}
+                      <select
+                        className="form-select"
+                        name="bags"
+                        value={form.bags}
                         onChange={handleChange}
                         required
-                      />
-                      <small className="text-muted">Priced per 10 lb bag</small>
+                      >
+                        {Array.from({length: 10}, (_, i) => i + 1).map(num => (
+                          <option key={num} value={num}>{num} bag{num > 1 ? 's' : ''}</option>
+                        ))}
+                      </select>
+                      <small className="text-muted">
+                        💡 Each bag should weigh ~8-12 lbs when full
+                      </small>
                     </div>
                   </div>
 
@@ -530,16 +562,20 @@ function PickUp() {
                   <span className="fw-bold">{getSelectedTier().name}</span>
                 </div>
                 <div className="d-flex justify-content-between mb-2">
-                  <span>Weight:</span>
-                  <span>{form.weight_lbs} lbs</span>
+                  <span>Bags:</span>
+                  <span>{form.bags} bag{form.bags > 1 ? 's' : ''}</span>
                 </div>
                 <div className="d-flex justify-content-between mb-2">
-                  <span>Bags:</span>
-                  <span>{Math.ceil(form.weight_lbs / 10)} × 10 lb</span>
+                  <span>Est. Weight:</span>
+                  <span>{form.bags * 10} lbs</span>
                 </div>
                 <div className="d-flex justify-content-between mb-2">
                   <span>Rate:</span>
                   <span>${getSelectedTier().price}/bag</span>
+                </div>
+                <div className="d-flex justify-content-between mb-2">
+                  <span>Bags:</span>
+                  <span>{form.bags} bag{form.bags > 1 ? 's' : ''}</span>
                 </div>
                 <hr />
                 <div className="d-flex justify-content-between">
@@ -564,44 +600,5 @@ function PickUp() {
     </div>
   );
 }
-
-// Order Progress Component
-const OrderProgress = ({ currentStep = 1 }) => {
-  const steps = [
-    { icon: 'calendar-plus', label: 'Schedule' },
-    { icon: 'credit-card', label: 'Payment' },
-    { icon: 'truck', label: 'Pickup' },
-    { icon: 'check-circle', label: 'Complete' }
-  ];
-
-  return (
-    <div className="mb-4">
-      <div className="d-flex justify-content-between align-items-center">
-        {steps.map((step, index) => (
-          <div key={index} className="text-center flex-fill">
-            <div className={`mx-auto mb-2 d-flex align-items-center justify-content-center ${
-              index + 1 <= currentStep ? 'bg-success text-white' : 'bg-light text-muted'
-            }`} style={{ width: '40px', height: '40px', borderRadius: '50%' }}>
-              <i className={`fas fa-${step.icon} fa-sm`}></i>
-            </div>
-            <small className={index + 1 <= currentStep ? 'text-success fw-bold' : 'text-muted'}>
-              {step.label}
-            </small>
-            {index < steps.length - 1 && (
-              <div className="position-absolute" style={{
-                width: '100%',
-                height: '2px',
-                backgroundColor: index + 1 < currentStep ? '#10b981' : '#e5e7eb',
-                top: '20px',
-                left: '50%',
-                zIndex: -1
-              }} />
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 export default PickUp;

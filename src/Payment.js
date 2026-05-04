@@ -3,6 +3,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FaCreditCard, FaShieldAlt, FaLock, FaArrowLeft } from 'react-icons/fa';
+import OrderProgress from './OrderProgress';
 
 // Replace with your Stripe publishable key
 const stripePromise = loadStripe('pk_test_51RZQ4BDsSHsghj1lHq3hRKZ1W6J1t1ZtQHhBVbmjY3d9tFSrAeu6cOX8Evm5MBbrLXmz7i4hTqYg5I3I5gHqZIMT00chpM9blL');
@@ -27,17 +28,17 @@ function PaymentForm() {
     // };
 
     const tierPrices = {
-  self_wash: 18.00,
+  standard: 18.00,
   next_day: 25.00,
   same_day: 30.00,
-  recurring: 34.00
+  recurring: 16.00
 };
 
 const getServicePrice = () => {
   return tierPrices[pickupInfo?.pricing_tier] || 25.00;
 };
 
-    const bags = pickupInfo?.weight_lbs ? Math.ceil(pickupInfo.weight_lbs / 10) : 1;
+    const bags = pickupInfo?.bags || 1;
     const baseAmount = bags * getServicePrice();
     const processingFee = 4.50;
     const taxRate = 0.0825; // 8.25% tax
@@ -47,6 +48,7 @@ const getServicePrice = () => {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState('danger');
+    const [email, setEmail] = useState('');
     const stripe = useStripe();
     const elements = useElements();
 
@@ -61,6 +63,13 @@ const getServicePrice = () => {
 
         if (!stripe || !elements) {
             setMessage('Payment system is loading. Please wait...');
+            setMessageType('warning');
+            setLoading(false);
+            return;
+        }
+
+        if (!email.trim()) {
+            setMessage('Please enter your email address for order notifications.');
             setMessageType('warning');
             setLoading(false);
             return;
@@ -93,7 +102,8 @@ const getServicePrice = () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    ...pickupInfo
+                    ...pickupInfo,
+                    email: email.trim() // Add email for notifications
                 }),
             });
 
@@ -193,12 +203,12 @@ const getServicePrice = () => {
                                 <span className="fw-bold">{pickupInfo.pricing_tier_name || 'next-day'}</span>
                             </div>
                             <div className="d-flex justify-content-between mb-1">
-                                <span>Weight:</span>
-                                <span>{pickupInfo.weight_lbs || 10} lbs</span>
+                                <span>Bags:</span>
+                                <span>{bags} bag{bags > 1 ? 's' : ''}</span>
                             </div>
                             <div className="d-flex justify-content-between mb-3">
-                                <span>Bags:</span>
-                                <span>{bags} × 10 lb bags</span>
+                                <span>Est. Weight:</span>
+                                <span>~{bags * 10} lbs</span>
                             </div>
                         </div>
 
@@ -267,6 +277,24 @@ const getServicePrice = () => {
                         )}
 
                         <form onSubmit={handlePayment}>
+                            {/* Email for notifications */}
+                            <div className="row justify-content-center mb-4">
+                                <div className="col-md-8">
+                                    <label className="form-label">
+                                        📧 Email Address
+                                    </label>
+                                    <input
+                                        type="email"
+                                        className="form-control"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder="your.email@example.com"
+                                        required
+                                    />
+                                    <small className="text-muted">We'll send order updates and receipts here</small>
+                                </div>
+                            </div>
+
                             {/* Amount Display */}
                             <div className="mb-4">
                                 <label className="form-label">Total Amount</label>
@@ -372,6 +400,7 @@ const Payment = () => {
 
             {/* Main Content */}
             <div className="container py-4" style={{ maxWidth: '1000px' }}>
+                <OrderProgress currentStep={2} />
                 <Elements stripe={stripePromise}>
                     <PaymentForm />
                 </Elements>
