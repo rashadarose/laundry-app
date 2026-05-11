@@ -364,8 +364,8 @@ function PickUp() {
                   </div>
 
                   {/* Customer Info */}
-                  <div className="row justify-content-center mb-3">
-                    <div className="col-md-6">
+                  <div className="row mb-3">
+                    <div className="col-12">
                       <label className="form-label">
                         <FaUser className="me-1 text-primary" />
                         Full Name
@@ -381,8 +381,8 @@ function PickUp() {
                     </div>
                   </div>
 
-                  <div className="row justify-content-center mb-3">
-                    <div className="col-md-6">
+                  <div className="row mb-3">
+                    <div className="col-12">
                       <label className="form-label">
                         <FaPhone className="me-1 text-primary" />
                         Phone Number (optional)
@@ -399,8 +399,8 @@ function PickUp() {
                     </div>
                   </div>
 
-                  <div className="row justify-content-center mb-3">
-                    <div className="col-md-6">
+                  <div className="row mb-3">
+                    <div className="col-12">
                       <label className="form-label">
                         <FaWeight className="me-1 text-primary" />
                         Number of Bags

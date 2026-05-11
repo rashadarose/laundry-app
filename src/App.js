@@ -360,6 +360,8 @@ function App() {
             <Route path="/payment" element={<Payment />} />
             <Route path="/confirmation" element={<Confirmation />} />
             <Route path="/comingsoon" element={<ComingSoon />} />
+            <Route path="/careers" element={<ComingSoon pageName="Careers" />} />
+            <Route path="/press" element={<ComingSoon pageName="Press" />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/policy" element={<Policy />} />
             <Route path="/dashboard" element={<Dashboard />} />
@@ -428,8 +430,8 @@ function App() {
                 <ul className="list-unstyled">
                   <li><Link to="/weight" className="text-white-50 text-decoration-none" onClick={closeNavbar}>Weight Guide</Link></li>
                   <li><Link to="/about" className="text-white-50 text-decoration-none" onClick={closeNavbar}>About Us</Link></li> {/* Updated About Us link */}
-                  <li><Link to="/comingsoon" className="text-white-50 text-decoration-none" onClick={closeNavbar}>Careers</Link></li>
-                  <li><Link to="/comingsoon" className="text-white-50 text-decoration-none" onClick={closeNavbar}>Press</Link></li>
+                  <li><Link to="/careers" className="text-white-50 text-decoration-none" onClick={closeNavbar}>Careers</Link></li>
+                  <li><Link to="/press" className="text-white-50 text-decoration-none" onClick={closeNavbar}>Press</Link></li>
                 </ul>
               </div>
               
